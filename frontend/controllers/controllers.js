@@ -3,6 +3,7 @@
 
 module.exports = function( app ) {
   return {
+  	general: require('./general/general.js'),
   	user: require('./user/user.js')
   }
 }//(); QUESTION: Why should this export not have ();, but ./user/user.js should?
