@@ -1,4 +1,4 @@
-module.exports = function( app ) {
+module.exports = function() {
   return {
     get_current: require('./partials/_get_current.js'),
     get_specific: require('./partials/_get_specific.js'),
