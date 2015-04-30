@@ -18,6 +18,9 @@ app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 app.set('views', templatesFolder);
 
+// Set the public folder as the static folder
+app.use( express.static(__dirname + '/public') );
+
 // Get all global variables and functions
 require('./globals/globals.js');
 

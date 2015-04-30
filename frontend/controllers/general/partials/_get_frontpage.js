@@ -11,10 +11,10 @@ var mockData = {
 	}
 };
 
-module.exports = function( request, response ) {	
+module.exports = function( request, response ) {
 	// Getting all information about the current request.url
 	var location = url.parse( request.url, true );
-	
+
 	// Set the context to the page data
 	var context = { page: mockData };
 
