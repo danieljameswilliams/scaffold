@@ -21,9 +21,6 @@ app.set('views', templatesFolder);
 // Set the public folder as the static folder
 app.use( express.static(__dirname + '/public') );
 
-// Get all global variables and functions
-require('./globals/globals.js');
-
 var controllers = require('./controllers/controllers.js')( app );
 var routes = require('./routes/routes.js')( app, controllers );
 
