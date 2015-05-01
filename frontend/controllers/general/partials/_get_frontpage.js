@@ -12,6 +12,10 @@ var mockData = {
 };
 
 module.exports = function( request, response ) {
+	response.set( 'Content-Type', 'text/html' );
+	response.set( 'Cache-Control', 'no-store, no-cache' );
+	response.set( 'Expires', '-1' );
+
 	// Getting all information about the current request.url
 	var location = url.parse( request.url, true );
 

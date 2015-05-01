@@ -2,6 +2,7 @@ module.exports = function() {
   return {
     get_frontpage: require('./partials/_get_frontpage.js'),
     get_version: require('./partials/_get_version.js'),
-    get_app_cache: require('./partials/_get_app_cache.js')
+    get_app_cache: require('./partials/_get_app_cache.js'),
+    get_robots: require('./partials/_get_robots.js')
   }
 }();
