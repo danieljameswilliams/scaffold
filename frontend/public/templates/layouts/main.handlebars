@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html manifest="/app_cache.manifest">
-<head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/main.css">
-    <title>{{ meta.title }}</title>
-</head>
-<body>
-  <a class="logo" href="/">
-    <img class="logo-src" src="/images/logo.png" alt="Logo">
-  </a>
-	{{{ body }}}
+<html>
+  <head>
+      <meta charset="utf-8">
+      <link rel="stylesheet" type="text/css" href="/stylesheets/main.css">
+      <title>{{ meta.title }}</title>
+  </head>
+  <body>
+    {{!--<button class="js-login-button">Log ind / Tilmeld dig</button>--}}
+    {{> general/login }}
+    {{{ body }}}
 
-  <script type="text/javascript" src="/javascripts/lib/jquery.js"></script>
-  <script type="text/javascript" src="/javascripts/lib/handlebars.js"></script>
-  <script type="text/javascript" src="/javascripts/main.js"></script>
-</body>
+    <script type="text/javascript" src="/javascripts/lib/jquery.js"></script>
+    <script type="text/javascript" src="/javascripts/lib/handlebars.js"></script>
+    <script type="text/javascript" src="/javascripts/main.js"></script>
+  </body>
 </html>
