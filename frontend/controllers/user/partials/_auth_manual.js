@@ -1,6 +1,8 @@
 var User = require('../../../models/user.js');
+var AuthToken = require('../../../models/authtoken.js');
 var mongoose = require('mongoose');
 var passwordHash = require('password-hash');
+var crypto = require('crypto');
 
 module.exports = function( request, response ) {
   var username = request.body.username;
@@ -11,22 +13,35 @@ module.exports = function( request, response ) {
       return response.redirect('/?ref=login_failed');
     }
 
-    // Save a cookie on the clients computer containing the token.
-    response.cookie( 'usertoken', 'token-goes-here', {
-      maxAge: 900000,
-      httpOnly: true,
-      secure: true
+    crypto.randomBytes(48, function(ex, buf) {
+      var token = buf.toString('hex');
+
+      // Save a cookie on the clients computer containing the token.
+      response.cookie( 'usertoken', token, {
+        maxAge: 900000,
+        httpOnly: false,
+        secure: false
+      });
+
+      user = user.toObject();
+      delete user['password'];
+
+      var context = {
+        'user': user,
+        'token': token
+      };
+
+      var authTokenData = {
+        username: user.username,
+        token: token
+      }
+      AuthToken.update({ 'username': user.username }, authTokenData, { upsert: true });
+
+      //////////////////
+      /// PUBLIC API ///
+      //////////////////
+
+      return response.json(context);
     });
-
-    var context = {
-      'user': user,
-      'token': 'token-goes-here'
-    };
-
-    //////////////////
-    /// PUBLIC API ///
-    //////////////////
-
-    return response.redirect('/?ref=login_manual');
   });
 }
