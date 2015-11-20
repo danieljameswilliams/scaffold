@@ -4,7 +4,10 @@ module.exports = function( request, response ) {
 	response.set( 'Expires', '-1' );
 
 	// Set the context to the page data
-	var context = { page: null };
+	var context = {
+		isLoggedIn: request.isLoggedIn,
+		user: request.user
+	};
 
 	//////////////////
 	/// PUBLIC API ///

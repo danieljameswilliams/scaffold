@@ -33,7 +33,8 @@ var db = mongoose.connection;
 
 db.once('open', function() {
   var controllers = require('./controllers/controllers.js')( app );
-  var routes = require('./routes/routes.js')( app, controllers );
+  var decorators = require('./decorators/decorators.js')( app );
+  var routes = require('./routes/routes.js')( app, controllers, decorators );
 });
 
 db.once('error', function( err ) {

@@ -1,3 +1,6 @@
+{{#if isLoggedIn}}
+Hello "{{ user.first_name }} {{ user.last_name }}"
+{{else}}
 <button type="submit" class="login__facebook-button js-login__facebook-button">Forts&aelig;t med Facebook</button>
 
 <br><br>
@@ -12,3 +15,4 @@
 
 <a href="/bruger/opret">Opret bruger</a>
 <a href="/bruger/glemt">Glemt kodeord?</a>
+{{/if}}

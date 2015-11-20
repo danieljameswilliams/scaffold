@@ -51,7 +51,7 @@ App.Login = (function() {
 
     $.post( url, formData, function( data, textStatus, jqXHR ) {
       if( jqXHR.status == 200 && data !== undefined ) {
-        console.log('Welcome', data);
+        window.location.href = window.location.href;
       }
     });
   }

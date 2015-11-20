@@ -13,7 +13,7 @@ module.exports = function( request, response ) {
     fbResponse.on('data', function (chunk) {
       var result = JSON.parse(chunk);
       if( result.id == userId ) {
-        _onUserAuthenticationCompleted(response, result);
+        return _onUserAuthenticationCompleted(response, result);
       }
     });
   }).on('error', function(e) {
@@ -40,7 +40,13 @@ function _onUserAuthenticationCompleted( response, fbMeObj ) {
         'token': token
       };
 
-      AuthToken.insert({ 'username': user.username, 'token': token }, function( err, token ) {
+      var authTokenData = {
+        user: user.id,
+        token: token
+      }
+      AuthToken.update({ 'user': user.id }, authTokenData, { upsert: true }, function( err ) {
+        if( err )
+          console.log(err);
       });
 
       //////////////////

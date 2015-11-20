@@ -32,10 +32,13 @@ module.exports = function( request, response ) {
       };
 
       var authTokenData = {
-        username: user.username,
+        user: user._id,
         token: token
       }
-      AuthToken.update({ 'username': user.username }, authTokenData, { upsert: true });
+      AuthToken.update({ 'user': user._id }, authTokenData, { upsert: true }, function( err ) {
+        if( err )
+          console.log(err);
+      });
 
       //////////////////
       /// PUBLIC API ///

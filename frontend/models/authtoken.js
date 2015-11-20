@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 /* Schemas */
 var authTokenSchema  = new Schema({
-  username: String,
+  user: { type: Schema.ObjectId, ref: 'User' },
   token: String,
 });
 
