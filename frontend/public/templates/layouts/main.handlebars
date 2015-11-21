@@ -7,7 +7,11 @@
   </head>
   <body>
     {{!--<button class="js-login-button">Log ind / Tilmeld dig</button>--}}
-    {{> general/login }}
+    <fieldset>
+      <legend>Login</legend>
+      {{> general/login }}
+    </fieldset>
+
     {{{ body }}}
 
     <script type="text/javascript" src="/javascripts/lib/jquery.js"></script>

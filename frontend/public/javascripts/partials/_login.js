@@ -18,49 +18,13 @@ App.Login = (function() {
     dom.$facebookButton.on('click', _onFacebookButtonClicked);
   }
 
-  //////////////
-  // Partials //
-  //////////////
-
-  function loadFacebookScript( callback ) {
-    $.ajaxSetup({ cache: true });
-    $.getScript('//connect.facebook.net/da_DK/sdk.js', function(){
-      console.log('Loaded');
-      FB.init({
-        appId: '415747435299107',
-        xfbml: true,
-        version: 'v2.5'
-      });
-
-      if( typeof(callback) == 'function' ) {
-        console.log('Calling Callback');
-        callback.call(this);
-      }
-    });
-  }
-
-  function getOrCreateUserInAPI( response ) {
-    var userId = response.authResponse.userID;
-    var accessToken = response.authResponse.accessToken;
-    var url = 'http://localhost:3000/api/auth/facebook';
-
-    var formData = {
-      'accessToken': accessToken,
-      'userId': userId
-    };
-
-    $.post( url, formData, function( data, textStatus, jqXHR ) {
-      if( jqXHR.status == 200 && data !== undefined ) {
-        window.location.href = window.location.href;
-      }
-    });
-  }
+  ////////////////
+  /// PARTIALS ///
+  ////////////////
 
   function _onFacebookButtonClicked( event ) {
     event.preventDefault();
-    console.log('Clicked');
     loadFacebookScript(function() {
-      console.log('Callback Loaded');
       FB.login(function( response ){
         if( response.status == 'connected' ) {
           getOrCreateUserInAPI( response );
@@ -72,8 +36,59 @@ App.Login = (function() {
           alert('Something went wrong');
         }
       }, {
-        scope: 'publish_actions, email'
+        scope: 'email'
       });
+    });
+  }
+
+  ///////////////
+  /// HELPERS ///
+  ///////////////
+
+  function loadFacebookScript( callback ) {
+    $.ajaxSetup({ cache: true });
+    $.getScript('//connect.facebook.net/da_DK/sdk.js', function(){
+      FB.init({
+        appId: '415747435299107',
+        xfbml: true,
+        version: 'v2.5'
+      });
+
+      if( typeof(callback) == 'function' ) {
+        callback.call(this);
+      }
+    });
+  }
+
+  function getOrCreateUserInAPI( response ) {
+    var userId = response.authResponse.userID;
+    var accessToken = response.authResponse.accessToken;
+    var url = '/api/auth/facebook';
+
+    var formData = {
+      'accessToken': accessToken,
+      'userId': userId
+    };
+
+    var request = $.post( url, formData );
+
+    request.done(function( data, textStatus, jqXHR ) {
+      if( jqXHR.status == 200 && data !== undefined ) {
+        var isNew = data.new == true ? '_new' : '';
+        window.location.href = window.location.href + '?ref=auth_facebook' + isNew;
+      }
+    });
+
+    request.fail(function( jqXHR ) {
+      if( jqXHR.status == 403 ) {
+        alert('Could not log you into Facebook');
+      }
+      else if( jqXHR.status == 500 ) {
+        alert('Something went wrong');
+      }
+      else if( jqXHR.status == 409 ) {
+        alert('Already have a user');
+      }
     });
   }
 

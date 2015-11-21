@@ -13,38 +13,41 @@ module.exports = function( request, response ) {
       return response.redirect('/?ref=login_failed');
     }
 
-    crypto.randomBytes(48, function(ex, buf) {
-      var token = buf.toString('hex');
+    if( user !== null ) {
+      crypto.randomBytes(48, function(ex, buf) {
+        var token = buf.toString('hex');
 
-      // Save a cookie on the clients computer containing the token.
-      response.cookie( 'usertoken', token, {
-        maxAge: 900000,
-        httpOnly: false,
-        secure: false
+        // Save a cookie on the clients computer containing the token.
+        response.cookie( 'usertoken', token, {
+          maxAge: 900000,
+          httpOnly: false,
+          secure: false
+        });
+
+        user = user.toObject();
+        delete user['password'];
+
+        var context = {
+          'new': false,
+          'user': user,
+          'token': token
+        };
+
+        var authTokenData = {
+          user: user._id,
+          token: token
+        }
+        AuthToken.update({ 'user': user._id }, authTokenData, { upsert: true }, function( err ) {
+          if( err )
+            console.log(err);
+        });
+
+        //////////////////
+        /// PUBLIC API ///
+        //////////////////
+
+        return response.json(context);
       });
-
-      user = user.toObject();
-      delete user['password'];
-
-      var context = {
-        'user': user,
-        'token': token
-      };
-
-      var authTokenData = {
-        user: user._id,
-        token: token
-      }
-      AuthToken.update({ 'user': user._id }, authTokenData, { upsert: true }, function( err ) {
-        if( err )
-          console.log(err);
-      });
-
-      //////////////////
-      /// PUBLIC API ///
-      //////////////////
-
-      return response.json(context);
-    });
+    }
   });
 }

@@ -2,7 +2,7 @@ var passport = require('passport');
 
 module.exports = function( app, controllers ) {
   // GET Requests
-  app.get( '/bruger/opret', controllers.user.get_current );
+  app.get( '/bruger/opret', controllers.user.get_signup );
 
   // POST Requests
   // PUT Requests
@@ -19,6 +19,7 @@ module.exports = function( app, controllers ) {
   // POST Requests
   app.post( '/api/auth/manual', controllers.user.auth_manual );
   app.post( '/api/auth/facebook', controllers.user.auth_facebook );
+  app.post( '/api/signup/manual', controllers.user.signup_manual );
 
   // PUT Requests
 };

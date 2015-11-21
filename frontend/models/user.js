@@ -9,7 +9,8 @@ var userSchema  = new Schema({
   password: String,
   email: String,
   phone: String,
-  birthdate: Date
+  birthdate: Date,
+  facebookId: String
 });
 
 /* Models */
