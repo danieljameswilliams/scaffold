@@ -112,11 +112,26 @@ function createANewFacebookUser( response, fbMeObj, token ) {
       return response.send(500);
     }
 
-    user = user.toObject();
-    delete user.__v;
-    delete user._id;
-
     if( user !== null ) {
+      response.cookie( 'usertoken', token, {
+        maxAge: 900000,
+        httpOnly: false,
+        secure: false
+      });
+
+      var authTokenData = {
+        user: user.id,
+        token: token
+      }
+      AuthToken.update({ 'user': user.id }, authTokenData, { upsert: true }, function( tokenErr ) {
+        if( tokenErr )
+          console.log(tokenErr);
+      });
+
+      user = user.toObject();
+      delete user.__v;
+      delete user._id;
+
       context = {
         'new': true,
         'user': user,

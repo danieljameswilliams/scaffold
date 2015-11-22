@@ -20,6 +20,7 @@ module.exports = function( app, controllers ) {
   app.post( '/api/auth/manual', controllers.user.auth_manual );
   app.post( '/api/auth/facebook', controllers.user.auth_facebook );
   app.post( '/api/signup/manual', controllers.user.signup_manual );
+  app.post( '/api/account/facebook', controllers.user.add_facebook );
 
   // PUT Requests
 };

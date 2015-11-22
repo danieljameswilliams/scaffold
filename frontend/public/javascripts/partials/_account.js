@@ -1,6 +1,6 @@
 var App = App || {};
 
-App.Login = (function() {
+App.Account = (function() {
   'use strict';
 
   var dom = {};
@@ -11,10 +11,12 @@ App.Login = (function() {
   }
 
   function _setupDOM() {
-    dom.$facebookButton = $('.js-login__facebook-button');
+    dom.$logoutButton = $('.js-account__logout-button');
+    dom.$facebookButton = $('.js-account__facebook-button');
   }
 
   function _addEventListeners() {
+    dom.$logoutButton.on('click', _onLogoutButtonClicked);
     dom.$facebookButton.on('click', _onFacebookButtonClicked);
   }
 
@@ -22,15 +24,23 @@ App.Login = (function() {
   /// PARTIALS ///
   ////////////////
 
+  function _onLogoutButtonClicked( event ) {
+    $(this).attr('disabled', 'disabled');
+
+    deleteCookie('usertoken');
+    window.location.href = '/';
+  }
+
   function _onFacebookButtonClicked( event ) {
     event.preventDefault();
 
     $(this).attr('disabled', 'disabled');
+    var username = $(this).data('username');
 
     loadFacebookScript(function() {
       FB.login(function( response ){
         if( response.status == 'connected' ) {
-          getOrCreateUserInAPI( response );
+          mergeFacebookToUserInAPI( response, username );
         }
         else if( response.status == 'not_authorized') {
           alert('not_authorized');
@@ -43,10 +53,6 @@ App.Login = (function() {
       });
     });
   }
-
-  ///////////////
-  /// HELPERS ///
-  ///////////////
 
   function loadFacebookScript( callback ) {
     $.ajaxSetup({ cache: true });
@@ -63,27 +69,22 @@ App.Login = (function() {
     });
   }
 
-  function getOrCreateUserInAPI( response ) {
+  function mergeFacebookToUserInAPI( response, username ) {
     var userId = response.authResponse.userID;
     var accessToken = response.authResponse.accessToken;
-    var url = '/api/auth/facebook';
+    var url = '/api/account/facebook';
 
     var formData = {
       'accessToken': accessToken,
-      'userId': userId
+      'userId': userId,
+      'username': username
     };
 
     var request = $.post( url, formData );
 
     request.done(function( data, textStatus, jqXHR ) {
       if( jqXHR.status == 200 && data !== undefined ) {
-        var isNew = data.new == true ? '_new' : '';
-        if( window.location.pathname == '/bruger/opret' ) {
-          window.location.href = '/?ref=auth_facebook' + isNew;
-        }
-        else {
-          window.location.href = window.location.href + '?ref=auth_facebook' + isNew;
-        }
+        console.log('Merge completed');
       }
     });
 
@@ -94,10 +95,16 @@ App.Login = (function() {
       else if( jqXHR.status == 500 ) {
         alert('Something went wrong');
       }
-      else if( jqXHR.status == 409 ) {
-        alert('Already have a user');
-      }
     });
+  }
+
+  ///////////////
+  /// HELPERS ///
+  ///////////////
+
+  function deleteCookie( name ) {
+    // We delete a cookie by setting it to expire in the past.
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   }
 
   ////////////////
