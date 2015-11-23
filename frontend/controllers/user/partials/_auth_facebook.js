@@ -4,140 +4,212 @@ var mongoose = require('mongoose');
 var passwordHash = require('password-hash');
 var https = require('https');
 var crypto = require('crypto');
+var Q = require("q");
+var authManual = require('./_auth_manual.js');
 
-module.exports = function( request, response ) {
+
+/**
+ * The user has sent us accessToken & userId of his Facebook profile,
+ * .. We need to validate on server-side that it is in fact a valid token
+ * .. So first we "validate", then we "login" or "create" a new user for him.
+ * @return {HttpResponse}
+ */
+function login( request, response ) {
   var accessToken = request.body.accessToken;
   var userId = request.body.userId;
 
-  https.get('https://graph.facebook.com/me?fields=id,first_name,last_name,email&access_token=' + accessToken, function( fbResponse ) {
-    fbResponse.on('data', function (chunk) {
-      var result = JSON.parse(chunk);
-      if( result.error && result.error.code == 190 ) {
+  if( accessToken && userId ) {
+    var getUser = getOrCreateUser( accessToken, userId );
+
+    getUser.then(function( user ) {
+      var getHttpResponse = authManual.buildHttpResponse( response, user );
+
+      getHttpResponse.then(function( context ) {
+        return response.json(context);
+      });
+    });
+
+    getUser.fail(function( errorObj ) {
+      if( errorObj.statusCode == 403 ) {
         return response.send(403);
       }
-      else if( result.id == userId ) {
-        return _onUserAuthenticationCompleted(response, result);
+      else if( errorObj.statusCode == 500 ) {
+        return response.send(500);
       }
     });
-  }).on('error', function(e) {
-    return response.send(500);
-  });
+  }
+  else {
+    return response.send(400);
+  }
 }
 
-function _onUserAuthenticationCompleted( response, fbMeObj ) {
-  var userId = fbMeObj.id;
-
-  User.findOne({ 'facebookId': userId }, { password: 0 }, function( err, user ) {
-    crypto.randomBytes(48, function(ex, buf) {
-      var token = buf.toString('hex');
-      var context = {};
-
-      if( user !== null ) {
-        // Save a cookie on the clients computer containing the token.
-        response.cookie( 'usertoken', token, {
-          maxAge: 900000,
-          httpOnly: false,
-          secure: false
-        });
-
-        var authTokenData = {
-          user: user.id,
-          token: token
-        }
-        AuthToken.update({ 'user': user.id }, authTokenData, { upsert: true }, function( tokenErr ) {
-          if( tokenErr )
-            console.log(tokenErr);
-        });
-
-        context = {
-          'new': false,
-          'user': user,
-          'token': token
-        };
-
-        return response.json(context);
-      }
-      else {
-        // This means that we don't already have this user with a connected Facebook profile,
-        // However we will try to see if he might have a manual user, to avoid duplicating users.
-        checkIfUserEmailExist(response, fbMeObj, token);
-      }
-    });
-  });
-}
 
 ////////////////////
 ///// PARTIALS /////
 ////////////////////
 
-function checkIfUserEmailExist( response, fbMeObj, token ) {
-  User.findOne({ 'email': fbMeObj.email }, { password: 0 }, function( emailUserErr, emailUser ) {
-    if( emailUserErr ) {
-      console.log( emailUser );
-    }
 
-    if( emailUser !== null ) {
-      // This means that we already have a user with this email attached in the system,
-      // Lets ask the user to merge the two accounts instead of duplicating him.
-      context = {
-        user: null,
-        token: null,
-        error: {
-          slug: 'UserAlreadyExistAsManual',
-          description: 'The user already exists as manual, please contact customer service to get them merged.'
-        }
-      };
-      return response.send(409);
+/**
+ * First we check if the Facebook-AccessToken is valid, when that is done,
+ * .. We then match the facebook-userId with our database, and return a user.
+ */
+function getOrCreateUser( accessToken, userId ) {
+  var deferred = Q.defer();
+
+  if( accessToken && userId ) {
+    var getFacebookUser = _validateFacebookToken(accessToken, userId);
+
+    getFacebookUser.then(function( facebookObj ) {
+      var getManualUser = _getOrCreateManualUser( facebookObj );
+
+      getManualUser.then(function( manualObj ) {
+        deferred.resolve( manualObj );
+        return manualObj;
+      });
+
+      getManualUser.fail(function( errorObj ) {
+        deferred.reject( errorObj );
+        return errorObj;
+      });
+    });
+
+    getFacebookUser.fail(function( errorObj ) {
+      deferred.reject( errorObj );
+      return errorObj;
+    });
+  }
+  else {
+    deferred.reject({ 'statusCode': 400, 'message': 'Missing "AccessToken" or "UserId"' });
+  }
+
+  return deferred.promise;
+}
+
+
+/**
+ * Validates a Facebook "AccessToken" server-side to ensure security and authentity of user.
+ */
+function _validateFacebookToken( accessToken, userId ) {
+  var deferred = Q.defer();
+  var fields = 'id,first_name,last_name,email';
+  var url = 'https://graph.facebook.com/me?fields=' + fields + '&access_token=' + accessToken;
+
+  https.get(url, function( httpsResponse ) {
+    httpsResponse.on('data', function ( chunk ) {
+      var facebookObj = JSON.parse(chunk);
+
+      if( facebookObj.error && facebookObj.error.code == 190 ) {
+        var errorObj = { 'statusCode': 403, 'message': 'Not a valid "AccessToken"' };
+        deferred.reject(errorObj);
+      }
+      else if( facebookObj.id == userId ) {
+        deferred.resolve(facebookObj);
+      }
+    });
+  }).on('error', function( error ) {
+    var errorObj = { 'statusCode': 500, 'message': error.message };
+    deferred.reject(errorObj);
+  });
+
+  return deferred.promise;
+}
+
+
+/**
+ * Validates if the facebook-userID matches a user in our database.
+ */
+function _getOrCreateManualUser( facebookObj ) {
+  var deferred = Q.defer();
+
+  User.findOne({ 'facebookId': facebookObj.id }, { password: 0 }, function( error, user ) {
+    if( error ) {
+      var errorObj = { 'statusCode': 500, 'message': error.message };
+      deferred.reject(errorObj);
+    }
+    else if( user ) {
+      deferred.resolve( user );
     }
     else {
-      // This means that there is no user with Facebook nor Manual connection,
-      // we should in this case create a new user.
-      createANewFacebookUser(response, fbMeObj, token);
-    }
-  });
-}
+      if( facebookObj.email ) {
+        var getDuplicateUsers = _checkIfUserExistByEmail( facebookObj );
 
-function createANewFacebookUser( response, fbMeObj, token ) {
-  var user = new User({
-    first_name: fbMeObj.first_name,
-    last_name: fbMeObj.last_name,
-    username: fbMeObj.email,
-    email: fbMeObj.email,
-    facebookId: fbMeObj.id
-  });
+        getDuplicateUsers.then(function( manualObj ) {
+          deferred.resolve( manualObj );
+        });
 
-  user.save(function( err, user ) {
-    if( err ) {
-      console.log(err);
-      return response.send(500);
-    }
-
-    if( user !== null ) {
-      response.cookie( 'usertoken', token, {
-        maxAge: 900000,
-        httpOnly: false,
-        secure: false
-      });
-
-      var authTokenData = {
-        user: user.id,
-        token: token
+        getDuplicateUsers.fail(function( errorObj ) {
+          deferred.reject( errorObj );
+        });
       }
-      AuthToken.update({ 'user': user.id }, authTokenData, { upsert: true }, function( tokenErr ) {
-        if( tokenErr )
-          console.log(tokenErr);
-      });
+      else {
+        deferred.reject({ 'statusCode': 400, 'message': 'Missing "Email" from Facebook' });
+      }
+    }
+  });
 
-      user = user.toObject();
-      delete user.__v;
-      delete user._id;
+  return deferred.promise;
+}
 
-      context = {
-        'new': true,
-        'user': user,
-        'token': token
-      };
-      return response.json(context);
+
+/**
+ * Checking if there is a manual user by email,
+ * If there is a user, we return that user, if not we raise an error.
+ */
+function _checkIfUserExistByEmail( facebookObj ) {
+  var deferred = Q.defer();
+
+  User.findOne({ 'email': facebookObj.email }, { password: 0 }, function( error, user ) {
+    if( error ) {
+      var errorObj = { 'statusCode': 500, 'message': error.message };
+      deferred.reject(errorObj);
+    }
+    else if( user ) {
+      var errorObj = { 'statusCode': 409, 'message': 'The email is already in use' };
+      deferred.reject(errorObj);
+    }
+    else {
+      _createANewFacebookUser( facebookObj, deferred );
+    }
+  });
+
+  return deferred.promise;
+}
+
+
+/**
+ * We have now checked if there is already an account by FacebookID and by Email,
+ * And now we can create a new User with already attached "facebookId"
+ */
+function _createANewFacebookUser( facebookObj, deferred ) {
+  var user = new User({
+    first_name: facebookObj.first_name,
+    last_name: facebookObj.last_name,
+    username: facebookObj.email,
+    email: facebookObj.email,
+    facebookId: facebookObj.id
+  });
+
+  user.save(function( error, user ) {
+    if( error ) {
+      var errorObj = { 'statusCode': 500, 'message': error.message };
+      deferred.reject(errorObj);
+    }
+    else if( user ) {
+      deferred.resolve(user);
+    }
+    else {
+      var errorObj = { 'statusCode': 500, 'message': 'Saved user, but got no user in return.' };
+      deferred.reject(errorObj);
     }
   });
 }
+
+
+//////////////////////
+///// PUBLIC API /////
+//////////////////////
+
+module.exports = {
+  login: login,
+  getOrCreateUser: getOrCreateUser
+};

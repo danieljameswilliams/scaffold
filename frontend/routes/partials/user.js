@@ -17,8 +17,8 @@ module.exports = function( app, controllers ) {
   app.get( '/api/users', controllers.user.get_full_list );
 
   // POST Requests
-  app.post( '/api/auth/manual', controllers.user.auth_manual );
-  app.post( '/api/auth/facebook', controllers.user.auth_facebook );
+  app.post( '/api/auth/manual', controllers.user.auth_manual.login );
+  app.post( '/api/auth/facebook', controllers.user.auth_facebook.login );
   app.post( '/api/signup/manual', controllers.user.signup_manual );
   app.post( '/api/account/facebook', controllers.user.add_facebook );
 

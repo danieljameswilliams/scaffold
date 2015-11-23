@@ -77,12 +77,11 @@ App.Login = (function() {
 
     request.done(function( data, textStatus, jqXHR ) {
       if( jqXHR.status == 200 && data !== undefined ) {
-        var isNew = data.new == true ? '_new' : '';
         if( window.location.pathname == '/bruger/opret' ) {
-          window.location.href = '/?ref=auth_facebook' + isNew;
+          window.location.href = '/?ref=auth_facebook';
         }
         else {
-          window.location.href = window.location.href + '?ref=auth_facebook' + isNew;
+          window.location.href = window.location.href + '?ref=auth_facebook';
         }
       }
     });
