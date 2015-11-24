@@ -168,7 +168,15 @@ function _checkIfUserExistByEmail( facebookObj ) {
       deferred.reject(errorObj);
     }
     else {
-      _createANewFacebookUser( facebookObj, deferred );
+      var getNewFacebookUser = _createANewFacebookUser( facebookObj );
+
+      getNewFacebookUser.then(function( user ) {
+        deferred.resolve(user);
+      });
+
+      getNewFacebookUser.fail(function( errorObj ) {
+        deferred.reject(errorObj);
+      });
     }
   });
 
@@ -180,7 +188,9 @@ function _checkIfUserExistByEmail( facebookObj ) {
  * We have now checked if there is already an account by FacebookID and by Email,
  * And now we can create a new User with already attached "facebookId"
  */
-function _createANewFacebookUser( facebookObj, deferred ) {
+function _createANewFacebookUser( facebookObj ) {
+  var deferred = Q.defer();
+
   var user = new User({
     first_name: facebookObj.first_name,
     last_name: facebookObj.last_name,
@@ -202,6 +212,8 @@ function _createANewFacebookUser( facebookObj, deferred ) {
       deferred.reject(errorObj);
     }
   });
+
+  return deferred.promise;
 }
 
 

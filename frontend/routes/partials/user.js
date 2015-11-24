@@ -12,10 +12,6 @@ module.exports = function( app, controllers ) {
   ///////////
 
   // GET Requests
-  app.get( '/api/user', controllers.user.get_current );
-  app.get( '/api/user/:id', controllers.user.get_specific );
-  app.get( '/api/users', controllers.user.get_full_list );
-
   // POST Requests
   app.post( '/api/auth/manual', controllers.user.auth_manual.login );
   app.post( '/api/auth/facebook', controllers.user.auth_facebook.login );
