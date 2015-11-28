@@ -1,74 +1,91 @@
-var User = require('../../../models/user.js');
-var AuthToken = require('../../../models/authtoken.js');
-var mongoose = require('mongoose');
 var passwordHash = require('password-hash');
-var crypto = require('crypto');
 
-module.exports = function( request, response ) {
+var User = require('../../../models/user.js');
+var authManual = require('./_auth_manual.js');
+
+function signup( request, response ) {
   var username = request.body.username;
   var password = request.body.password;
   var firstName = request.body.first_name;
   var lastName = request.body.last_name;
 
-  User.findOne({ 'username': username }, function( err, user ) {
-    if( err ) {
-      return response.send(500);
-    }
+  var getUser = authManual.getUser( username );
 
-    if( user == null ) {
-      // This means that there is no other manual user by this email, which also means there are no Facebook users.
-      var newUser = new User({
+  getUser.then(function( user ) {
+    return response.send(409);
+  });
+
+  getUser.fail(function( errorObj ) {
+    if( errorObj.statusCode == 204 ) {
+      
+      var userObj = {
         first_name: firstName,
         last_name: lastName,
         username: username,
         email: username,
         password: passwordHash.generate(password)
+      };
+
+      var getNewUser = createNewUser( userObj );
+
+      getNewUser.then(function( user ) {
+        var getHttpResponse = buildHttpResponse( response, user );
+
+        getHttpResponse.then(function( context ) {
+          return response.json(context);
+        });
       });
-      newUser.save(function( newErr, newUser ) {
-        if( newErr ) {
-          return response.send(500);
-        }
 
-        if( newUser !== null ) {
-          crypto.randomBytes(48, function(ex, buf) {
-            var token = buf.toString('hex');
-
-            // Save a cookie on the clients computer containing the token.
-            response.cookie( 'usertoken', token, {
-              maxAge: 900000,
-              httpOnly: false,
-              secure: false
-            });
-
-            newUser = newUser.toObject();
-            delete newUser['password'];
-
-            var context = {
-              'new': true,
-              'user': newUser,
-              'token': token
-            };
-
-            var authTokenData = {
-              user: newUser._id,
-              token: token
-            }
-            AuthToken.update({ 'user': newUser._id }, authTokenData, { upsert: true }, function( err ) {
-              if( err )
-                console.log(err);
-            });
-
-            return response.json(context);
-          });
-        }
+      getNewUser.fail(function( errorObj ) {
+        return response.send(500);
       });
     }
-    else {
-      return response.send(409);
+    else if( errorObj.statusCode == 403 ) {
+      return response.send(403);
+    }
+    else if( errorObj.statusCode == 500 ) {
+      return response.send(500);
     }
   });
 }
 
+
 ////////////////////
 ///// PARTIALS /////
 ////////////////////
+
+/**
+ * We have now checked if there is already an account by FacebookID and by Email,
+ * And now we can create a new User with already attached "facebookId"
+ */
+function createNewUser( userObj ) {
+  var deferred = Q.defer();
+
+  var user = new User(userObj);
+
+  user.save(function( error, user ) {
+    if( error ) {
+      var errorObj = { 'statusCode': 500, 'message': error.message };
+      deferred.reject(errorObj);
+    }
+    else if( user ) {
+      deferred.resolve(user);
+    }
+    else {
+      var errorObj = { 'statusCode': 500, 'message': 'Saved user, but got no user in return.' };
+      deferred.reject(errorObj);
+    }
+  });
+
+  return deferred.promise;
+}
+
+
+//////////////////////
+///// PUBLIC API /////
+//////////////////////
+
+module.exports = {
+  signup: signup,
+  createNewUser: createNewUser
+};

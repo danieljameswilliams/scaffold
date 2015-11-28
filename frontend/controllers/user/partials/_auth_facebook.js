@@ -1,11 +1,9 @@
-var User = require('../../../models/user.js');
-var AuthToken = require('../../../models/authtoken.js');
-var mongoose = require('mongoose');
-var passwordHash = require('password-hash');
 var https = require('https');
-var crypto = require('crypto');
 var Q = require("q");
+
+var User = require('../../../models/user.js');
 var authManual = require('./_auth_manual.js');
+var signupManual = require('./_signup_manual.js');
 
 
 /**
@@ -57,7 +55,7 @@ function getOrCreateUser( accessToken, userId ) {
   var deferred = Q.defer();
 
   if( accessToken && userId ) {
-    var getFacebookUser = _validateFacebookToken(accessToken, userId);
+    var getFacebookUser = validateFacebookToken(accessToken, userId);
 
     getFacebookUser.then(function( facebookObj ) {
       var getManualUser = _getOrCreateManualUser( facebookObj );
@@ -89,7 +87,7 @@ function getOrCreateUser( accessToken, userId ) {
 /**
  * Validates a Facebook "AccessToken" server-side to ensure security and authentity of user.
  */
-function _validateFacebookToken( accessToken, userId ) {
+function validateFacebookToken( accessToken, userId ) {
   var deferred = Q.defer();
   var fields = 'id,first_name,last_name,email';
   var url = 'https://graph.facebook.com/me?fields=' + fields + '&access_token=' + accessToken;
@@ -104,6 +102,10 @@ function _validateFacebookToken( accessToken, userId ) {
       }
       else if( facebookObj.id == userId ) {
         deferred.resolve(facebookObj);
+      }
+      else {
+        var errorObj = { 'statusCode': 500, 'message': facebookObj.error.message };
+        deferred.reject(errorObj);
       }
     });
   }).on('error', function( error ) {
@@ -168,48 +170,22 @@ function _checkIfUserExistByEmail( facebookObj ) {
       deferred.reject(errorObj);
     }
     else {
-      var getNewFacebookUser = _createANewFacebookUser( facebookObj );
+      var userObj = {
+        first_name: facebookObj.first_name,
+        last_name: facebookObj.last_name,
+        username: facebookObj.email,
+        email: facebookObj.email,
+        facebookId: facebookObj.id
+      };
+      var getNewUser = signupManual.createNewUser( userObj );
 
-      getNewFacebookUser.then(function( user ) {
+      getNewUser.then(function( user ) {
         deferred.resolve(user);
       });
 
-      getNewFacebookUser.fail(function( errorObj ) {
+      getNewUser.fail(function( errorObj ) {
         deferred.reject(errorObj);
       });
-    }
-  });
-
-  return deferred.promise;
-}
-
-
-/**
- * We have now checked if there is already an account by FacebookID and by Email,
- * And now we can create a new User with already attached "facebookId"
- */
-function _createANewFacebookUser( facebookObj ) {
-  var deferred = Q.defer();
-
-  var user = new User({
-    first_name: facebookObj.first_name,
-    last_name: facebookObj.last_name,
-    username: facebookObj.email,
-    email: facebookObj.email,
-    facebookId: facebookObj.id
-  });
-
-  user.save(function( error, user ) {
-    if( error ) {
-      var errorObj = { 'statusCode': 500, 'message': error.message };
-      deferred.reject(errorObj);
-    }
-    else if( user ) {
-      deferred.resolve(user);
-    }
-    else {
-      var errorObj = { 'statusCode': 500, 'message': 'Saved user, but got no user in return.' };
-      deferred.reject(errorObj);
     }
   });
 
@@ -223,5 +199,6 @@ function _createANewFacebookUser( facebookObj ) {
 
 module.exports = {
   login: login,
-  getOrCreateUser: getOrCreateUser
+  getOrCreateUser: getOrCreateUser,
+  validateFacebookToken: validateFacebookToken
 };

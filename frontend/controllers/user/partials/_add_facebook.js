@@ -1,45 +1,85 @@
-var User = require('../../../models/user.js');
-var mongoose = require('mongoose');
-var https = require('https');
+var Q = require("q");
 
-module.exports = function( request, response ) {
+var User = require('../../../models/user.js');
+var authFacebook = require('./_auth_facebook.js');
+
+
+/**
+ * When the user is logged in, he can call this API method to link his manual account with facebook. 
+ * @return {HttpResponse}
+ */
+function add( request, response ) {
   var accessToken = request.body.accessToken;
   var userId = request.body.userId;
   var username = request.body.username;
 
-  https.get('https://graph.facebook.com/me?fields=id,first_name,last_name,email&access_token=' + accessToken, function( fbResponse ) {
-    fbResponse.on('data', function (chunk) {
-      var result = JSON.parse(chunk);
-      if( result.error && result.error.code == 190 ) {
+  if( accessToken && userId && username ) {
+    var getFacebookData = authFacebook.validateFacebookToken(accessToken, userId);
+
+    getFacebookData.then(function( facebookObj ) {
+      var saveToUser = _addFacebookIdToManualUser( response, username, facebookObj );
+
+      saveToUser.then(function( manualObj ) {
+        return response.send(200);
+      });
+
+      saveToUser.fail(function( errorObj ) {
+        if( errorObj.statusCode == 403 ) {
+          return response.send(403);
+        }
+        else if( errorObj.statusCode == 500 ) {
+          return response.send(500);
+        }
+      });
+    });
+
+    getFacebookData.fail(function( errorObj ) {
+      if( errorObj.statusCode == 403 ) {
         return response.send(403);
       }
-      else if( result.id == userId ) {
-        return _onUserAuthenticationCompleted(response, username, result);
+      else if( errorObj.statusCode == 500 ) {
+        return response.send(500);
       }
     });
-  }).on('error', function(e) {
-    return response.send(500);
-  });
+  }
 }
 
-function _onUserAuthenticationCompleted( response, username, fbMeObj ) {
+
+////////////////////
+///// PARTIALS /////
+////////////////////
+
+function _addFacebookIdToManualUser( response, username, fbMeObj ) {
+  var deferred = Q.defer();
   var userId = fbMeObj.id;
 
   User.findOne({ 'username': username }, function( err, user ) {
     if( err ) {
-      return response.send(500);
+      var errorObj = { 'statusCode': 500, 'message': err.message };
+      deferred.reject(errorObj);
     }
-
-    if( user !== null ) {
+    else if( user ) {
       user.facebookId = userId;
 
       user.save(function( saveErr ) {
         if( saveErr ) {
-          return response.send(500);
+          var errorObj = { 'statusCode': 500, 'message': saveErr.message };
+          deferred.reject(errorObj);
         }
 
-        return response.send(200);
+        deferred.resolve(user);
       });
     }
   });
+
+  return deferred.promise;
 }
+
+
+//////////////////////
+///// PUBLIC API /////
+//////////////////////
+
+module.exports = {
+  add: add
+};
