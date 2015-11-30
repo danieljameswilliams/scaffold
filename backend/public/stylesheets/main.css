@@ -1,0 +1,4 @@
+/* This is all test styling, this should just be removed when first used */
+body { margin: 0; padding: 0; background-color: #f1f1f1; }
+.logo { display: block; }
+.logo-src { display: block; margin: 0 auto; }
