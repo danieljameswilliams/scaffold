@@ -7,13 +7,15 @@ var AuthToken = require('../../../models/authtoken.js');
 
 
 function login( request, response ) {
+  response.setHeader( 'Access-Control-Allow-Origin', '*' );
+
   var username = request.body.username;
   var password = request.body.password;
 
-  var getUser = getUser( username );
+  var getUser = getUserManual( username, password );
 
   getUser.then(function( user ) {
-    var getHttpResponse = buildHttpResponse( response, user );
+    var getHttpResponse = buildHttpResponse( user, 'customer' );
 
     getHttpResponse.then(function( context ) {
       return response.json(context);
@@ -22,6 +24,9 @@ function login( request, response ) {
 
   getUser.fail(function( errorObj ) {
     if( errorObj.statusCode == 403 ) {
+      return response.send(403);
+    }
+    else if( errorObj.statusCode == 204 ) {
       return response.send(403);
     }
     else if( errorObj.statusCode == 500 ) {
@@ -35,7 +40,9 @@ function login( request, response ) {
 ///// PARTIALS /////
 ////////////////////
 
-function getUser() {
+function getUserManual( username, password ) {
+  var deferred = Q.defer();
+
   User.findOne({ 'username': username }, function( error, user ) {
     if( error ) {
       var errorObj = { 'statusCode': 500, 'message': error.message };
@@ -46,6 +53,9 @@ function getUser() {
       deferred.reject(errorObj);
     }
     else if( user ) {
+      user = user.toObject();
+      delete user.password;
+
       deferred.resolve( user );
     }
     else {
@@ -53,26 +63,23 @@ function getUser() {
       deferred.reject(errorObj);
     }
   });
+
+  return deferred.promise;
 }
 
 
 /**
  * Lets actually login the user we have retrieved.
  */
-function buildHttpResponse( response, user ) {
+function buildHttpResponse( user, permission ) {
   var deferred = Q.defer();
   var getUniqueToken = _generateUniqueToken();
 
   getUniqueToken.then(function( token ) {
-    response.cookie( 'usertoken', token, {
-      maxAge: 900000,
-      httpOnly: false,
-      secure: false
-    });
-
     var authTokenData = {
       user: user.id,
-      token: token
+      token: token,
+      permission: permission
     };
 
     AuthToken.update({ 'user': user.id }, authTokenData, { upsert: true }, function( error ) {
@@ -80,10 +87,6 @@ function buildHttpResponse( response, user ) {
         console.log(error);
       }
     });
-
-    user = user.toObject();
-    delete user.__v;
-    delete user._id;
 
     context = {
       user: user,
@@ -119,6 +122,6 @@ function _generateUniqueToken() {
 
 module.exports = {
   login: login,
-  getUser: getUser,
+  getUser: getUserManual,
   buildHttpResponse: buildHttpResponse
 };

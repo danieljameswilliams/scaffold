@@ -66,7 +66,7 @@ App.Login = (function() {
   function getOrCreateUserInAPI( response ) {
     var userId = response.authResponse.userID;
     var accessToken = response.authResponse.accessToken;
-    var url = '/api/auth/facebook';
+    var url = 'http://localhost:9000/auth/facebook';
 
     var formData = {
       'accessToken': accessToken,
@@ -77,11 +77,13 @@ App.Login = (function() {
 
     request.done(function( data, textStatus, jqXHR ) {
       if( jqXHR.status == 200 && data !== undefined ) {
+        App.Helpers.Cookie.create('usertoken', data.token, 365);
+
         if( window.location.pathname == '/bruger/opret' ) {
           window.location.href = '/?ref=auth_facebook';
         }
         else {
-          window.location.href = window.location.href + '?ref=auth_facebook';
+          window.location.href = window.location.pathname + '?ref=auth_facebook';
         }
       }
     });

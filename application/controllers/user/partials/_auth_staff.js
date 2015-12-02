@@ -8,13 +8,15 @@ var authManual = require('./_auth_manual.js');
 
 
 function login( request, response ) {
+  response.setHeader( 'Access-Control-Allow-Origin', '*' );
+
   var username = request.body.username;
   var password = request.body.password;
 
   var getUser = getUser( username );
 
   getUser.then(function( user ) {
-    var getHttpResponse = authManual.buildHttpResponse( response, user );
+    var getHttpResponse = authManual.buildHttpResponse( user, 'staff' );
 
     getHttpResponse.then(function( context ) {
       return response.json(context);

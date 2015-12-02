@@ -1,9 +1,12 @@
 var passwordHash = require('password-hash');
+var Q = require("q");
 
 var User = require('../../../models/user.js');
 var authManual = require('./_auth_manual.js');
 
 function signup( request, response ) {
+  response.setHeader( 'Access-Control-Allow-Origin', '*' );
+
   var username = request.body.username;
   var password = request.body.password;
   var firstName = request.body.first_name;
@@ -17,7 +20,7 @@ function signup( request, response ) {
 
   getUser.fail(function( errorObj ) {
     if( errorObj.statusCode == 204 ) {
-      
+
       var userObj = {
         first_name: firstName,
         last_name: lastName,
@@ -29,7 +32,7 @@ function signup( request, response ) {
       var getNewUser = createNewUser( userObj );
 
       getNewUser.then(function( user ) {
-        var getHttpResponse = buildHttpResponse( response, user );
+        var getHttpResponse = authManual.buildHttpResponse( user, 'customer' );
 
         getHttpResponse.then(function( context ) {
           return response.json(context);
@@ -69,6 +72,9 @@ function createNewUser( userObj ) {
       deferred.reject(errorObj);
     }
     else if( user ) {
+      user = user.toObject();
+      delete user.password;
+
       deferred.resolve(user);
     }
     else {

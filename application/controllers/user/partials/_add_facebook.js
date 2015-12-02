@@ -5,10 +5,12 @@ var authFacebook = require('./_auth_facebook.js');
 
 
 /**
- * When the user is logged in, he can call this API method to link his manual account with facebook. 
+ * When the user is logged in, he can call this API method to link his manual account with facebook.
  * @return {HttpResponse}
  */
 function add( request, response ) {
+  response.setHeader( 'Access-Control-Allow-Origin', '*' );
+
   var accessToken = request.body.accessToken;
   var userId = request.body.userId;
   var username = request.body.username;

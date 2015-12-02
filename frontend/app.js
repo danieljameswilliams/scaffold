@@ -1,7 +1,16 @@
 var express = require('express');
 var exphbs = require('express-handlebars');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 
+// New Variables
 var app = express();
+
+app.use(cookieParser())
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 var templatesFolder = __dirname + '/public/templates';
 var hbs = exphbs.create({
@@ -19,6 +28,7 @@ app.set('views', templatesFolder);
 app.use( express.static(__dirname + '/public') );
 
 var controllers = require('./controllers/controllers.js')( app );
-var routes = require('./routes/routes.js')( app, controllers );
+var decorators = require('./decorators/decorators.js')( app );
+var routes = require('./routes/routes.js')( app, controllers, decorators );
 
 app.listen(5000);

@@ -13,6 +13,9 @@ var signupManual = require('./_signup_manual.js');
  * @return {HttpResponse}
  */
 function login( request, response ) {
+  response.setHeader( 'Access-Control-Allow-Origin', '*' );
+  response.setHeader( 'Access-Control-Allow-Credentials', true );
+
   var accessToken = request.body.accessToken;
   var userId = request.body.userId;
 
@@ -20,7 +23,7 @@ function login( request, response ) {
     var getUser = getOrCreateUser( accessToken, userId );
 
     getUser.then(function( user ) {
-      var getHttpResponse = authManual.buildHttpResponse( response, user );
+      var getHttpResponse = authManual.buildHttpResponse( user, 'customer' );
 
       getHttpResponse.then(function( context ) {
         return response.json(context);

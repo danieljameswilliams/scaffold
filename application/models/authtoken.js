@@ -5,6 +5,7 @@ var Schema = mongoose.Schema;
 var authTokenSchema  = new Schema({
   user: { type: Schema.ObjectId, ref: 'User' },
   token: String,
+  permission: String
 });
 
 /* Models */

@@ -10,7 +10,7 @@ Hello "{{ user.first_name }} {{ user.last_name }}"
 
 <br><br>
 
-<form action="/api/auth/manual" method="POST">
+<form action="http://localhost:9000/auth/manual" method="POST">
   <input type="text" name="username" value="mail@danielwilliams.dk"><br>
   <input type="password" name="password" value="password123"><br>
   <button type="submit">Log ind</button>
