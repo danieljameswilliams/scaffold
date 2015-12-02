@@ -40,9 +40,6 @@ function _getAuthToken( token, permission ) {
       deferred.reject(errorObj);
     }
     else if( tokenResponse ) {
-      var user = tokenResponse.user.toObject();
-      delete user.password;
-
       deferred.resolve(tokenResponse);
     }
     else {
