@@ -77,12 +77,12 @@ function buildHttpResponse( user, permission ) {
 
   getUniqueToken.then(function( token ) {
     var authTokenData = {
-      user: user.id,
+      user: user._id,
       token: token,
       permission: permission
     };
 
-    AuthToken.update({ 'user': user.id }, authTokenData, { upsert: true }, function( error ) {
+    AuthToken.update({ 'user': user._id }, authTokenData, { upsert: true }, function( error ) {
       if( error ) {
         console.log(error);
       }
