@@ -26,7 +26,8 @@ function signup( request, response ) {
         last_name: lastName,
         username: username,
         email: username,
-        password: passwordHash.generate(password)
+        password: passwordHash.generate(password),
+        isStaff: false
       };
 
       var getNewUser = createNewUser( userObj );

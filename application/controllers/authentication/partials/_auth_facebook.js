@@ -178,7 +178,8 @@ function _checkIfUserExistByEmail( facebookObj ) {
         last_name: facebookObj.last_name,
         username: facebookObj.email,
         email: facebookObj.email,
-        facebookId: facebookObj.id
+        facebookId: facebookObj.id,
+        isStaff: false
       };
       var getNewUser = signupManual.createNewUser( userObj );
 

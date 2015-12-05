@@ -16,4 +16,4 @@ function page( request, response ) {
 ///// PUBLIC API /////
 //////////////////////
 
-module.exports = page
+module.exports = page;

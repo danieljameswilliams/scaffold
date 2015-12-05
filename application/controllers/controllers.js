@@ -3,6 +3,7 @@
 
 module.exports = function() {
   return {
+    authentication: require('./authentication/authentication.js'),
     user: require('./user/user.js')
   }
 }

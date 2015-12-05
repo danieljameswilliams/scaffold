@@ -11,7 +11,7 @@ var userSchema  = new Schema({
   phone: String,
   birthdate: Date,
   facebookId: String,
-  isStaff: Boolean
+  isStaff: { type: Boolean, default: false }
 });
 
 /* Models */

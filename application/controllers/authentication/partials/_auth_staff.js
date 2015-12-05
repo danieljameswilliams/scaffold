@@ -13,7 +13,7 @@ function login( request, response ) {
   var username = request.body.username;
   var password = request.body.password;
 
-  var getUser = _getUser( username, password );
+  var getUser = fetchUser( username, password );
 
   getUser.then(function( user ) {
     var getHttpResponse = authManual.buildHttpResponse( user, 'staff' );
@@ -38,7 +38,7 @@ function login( request, response ) {
 ///// PARTIALS /////
 ////////////////////
 
-function _getUser( username, password ) {
+function fetchUser( username, password ) {
   User.findOne({ 'username': username, 'isStaff': true }, function( error, user ) {
     if( error ) {
       var errorObj = { 'statusCode': 500, 'message': error.message };
@@ -65,5 +65,5 @@ function _getUser( username, password ) {
 
 module.exports = {
   login: login,
-  getUser: getUser
+  getUser: fetchUser
 };

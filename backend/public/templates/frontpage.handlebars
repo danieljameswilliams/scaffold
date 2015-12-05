@@ -1,7 +1,3 @@
-{{#if isLoggedIn}}
-    Hello {{ user.first_name }} {{ user.last_name }}
-{{/if}}
+{{> general/login }}
 
-{{#unless isLoggedIn}}
-    {{> general/login }}
-{{/unless}}
+{{> general/navigation }}
