@@ -1,23 +1,31 @@
 var http = require('http');
+var Q = require("q");
 
 
 function isAuth( callback ) {
   return function ( request, response ) {
     var token = request.cookies.usertoken;
 
-    var validateAuthToken = validateAuthToken( token );
+    if( token ) {
+      var validateAuthToken = _validateAuthToken( token );
 
-    validateAuthToken.then(function( user ) {
-      request.isLoggedIn = true;
-      request.user = user;
-      return callback( request, response );
-    });
+      validateAuthToken.then(function( user ) {
+        request.isLoggedIn = true;
+        request.user = user;
+        return callback( request, response );
+      });
 
-    validateAuthToken.fail(function( errorObj ) {
+      validateAuthToken.fail(function( errorObj ) {
+        request.isLoggedIn = false;
+        request.user = null;
+        return callback( request, response );
+      });
+    }
+    else {
       request.isLoggedIn = false;
       request.user = null;
       return callback( request, response );
-    });
+    }
   };
 }
 
@@ -26,19 +34,19 @@ function isAuth( callback ) {
 ///// PARTIALS /////
 ////////////////////
 
-function validateAuthToken( token ) {
+function _validateAuthToken( token ) {
   var deferred = Q.defer();
-  var url = 'http://localhost:9000/auth?staff=true';
+  var url = 'http://localhost:9000/auth?permission=staff&token=' + token;
 
   http.get(url, function( response ) {
-    response.on('data', function ( chunk ) {
-      var data = JSON.parse(chunk);
-
+    response.setEncoding('binary');
+    response.on('data', function ( data ) {
       if( response.statusCode == 200 ) {
-        deferred.resolve(data);
+        data = JSON.parse(data);
+        deferred.resolve(data.user);
       }
       else if ( response.statusCode == 403 ) {
-        var errorObj = { 'statusCode': 403, 'message': data.message };
+        var errorObj = { 'statusCode': 403, 'message': data.statusMessage };
         deferred.reject(errorObj);
       }
       else {

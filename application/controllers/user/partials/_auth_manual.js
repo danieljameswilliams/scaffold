@@ -82,7 +82,7 @@ function buildHttpResponse( user, permission ) {
       permission: permission
     };
 
-    AuthToken.update({ 'user': user._id }, authTokenData, { upsert: true }, function( error ) {
+    AuthToken.update({ 'user': user._id, 'permission': permission }, authTokenData, { upsert: true }, function( error ) {
       if( error ) {
         console.log(error);
       }

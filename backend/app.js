@@ -27,6 +27,7 @@ app.set('views', templatesFolder);
 app.use( express.static(__dirname + '/public') );
 
 var controllers = require('./controllers/controllers.js')( app );
-var routes = require('./routes/routes.js')( app, controllers );
+var decorators = require('./decorators/decorators.js')( app );
+var routes = require('./routes/routes.js')( app, controllers, decorators );
 
 app.listen(8000);

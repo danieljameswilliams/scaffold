@@ -3,6 +3,7 @@
 
 module.exports = function() {
   return {
-  	user: require('./user/user.js')
+    general: require('./general/general.js'),
+    user: require('./user/user.js')
   }
 }

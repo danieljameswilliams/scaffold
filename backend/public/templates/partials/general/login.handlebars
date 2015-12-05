@@ -1,23 +1,11 @@
-{{#if isLoggedIn}}
-Hello "{{ user.first_name }} {{ user.last_name }}"
-<button class="js-account__logout-button">Log out</button>
+<fieldset>
+    <legend>Sign in as Staff</legend>
 
-{{#unless user.facebookId}}
-<button class="js-account__facebook-button" data-username="{{ user.username }}">Add Facebook Account</button>
-{{/unless}}
-{{else}}
-<button type="submit" class="login__facebook-button js-login__facebook-button">Login with Facebook</button>
+    <form action="http://localhost:9000/auth/staff" method="POST">
+        <input type="hidden" name="redirect" value="http://localhost:8000/">
 
-<br><br>
-
-<form action="/api/auth/manual" method="POST">
-  <input type="text" name="username" value="mail@danielwilliams.dk"><br>
-  <input type="password" name="password" value="password123"><br>
-  <button type="submit">Log ind</button>
-</form>
-
-<br><br>
-
-<a href="/bruger/opret">Opret bruger</a>
-<a href="/bruger/glemt">Glemt kodeord?</a>
-{{/if}}
+        <input type="text" name="username" value="mail@danielwilliams.dk"><br>
+        <input type="password" name="password" value="password123"><br>
+        <button type="submit">Log ind</button>
+    </form>
+</fieldset>

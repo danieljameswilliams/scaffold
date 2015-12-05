@@ -1,6 +1,6 @@
-module.exports = function( app, controllers ) {
+module.exports = function( app, controllers, decorators ) {
   // GET Requests
-  app.get( '/users', controllers.user.get_users );
+  app.get( '/users', decorators.isAuth(controllers.user.get_users) );
 
   // POST Requests
   // PUT Requests

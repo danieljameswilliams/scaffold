@@ -1,1 +1,7 @@
-Frontpage
+{{#if isLoggedIn}}
+    Hello {{ user.first_name }} {{ user.last_name }}
+{{/if}}
+
+{{#unless isLoggedIn}}
+    {{> general/login }}
+{{/unless}}

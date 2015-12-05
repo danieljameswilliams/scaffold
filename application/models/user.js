@@ -10,7 +10,8 @@ var userSchema  = new Schema({
   email: String,
   phone: String,
   birthdate: Date,
-  facebookId: String
+  facebookId: String,
+  isStaff: Boolean
 });
 
 /* Models */
