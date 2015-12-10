@@ -3,27 +3,29 @@ var Q = require("q");
 
 var User = require('../../../models/user.js');
 var authManual = require('./_auth_manual.js');
+var login = require('./../helpers/_login.js').login;
 
-function signup( request, response ) {
+
+function create( request, response ) {
   response.setHeader( 'Access-Control-Allow-Origin', '*' );
 
   var username = request.body.username;
   var password = request.body.password;
-  var firstName = request.body.first_name;
-  var lastName = request.body.last_name;
+  var firstName = request.body.firstName;
+  var lastName = request.body.lastName;
 
   var getUser = authManual.getUser( username );
 
   getUser.then(function( user ) {
-    return response.send(409);
+    return response.sendStatus(409);
   });
 
   getUser.fail(function( errorObj ) {
     if( errorObj.statusCode == 204 ) {
 
       var userObj = {
-        first_name: firstName,
-        last_name: lastName,
+        firstName: firstName,
+        lastName: lastName,
         username: username,
         email: username,
         password: passwordHash.generate(password),
@@ -33,22 +35,26 @@ function signup( request, response ) {
       var getNewUser = createNewUser( userObj );
 
       getNewUser.then(function( user ) {
-        var getHttpResponse = authManual.buildHttpResponse( user, 'customer' );
+        var getHttpResponse = login( request, user, 'customer' );
 
         getHttpResponse.then(function( context ) {
           return response.json(context);
         });
+
+        getHttpResponse.fail(function() {
+          return response.sendStatus(500);
+        });
       });
 
       getNewUser.fail(function( errorObj ) {
-        return response.send(500);
+        return response.sendStatus(500);
       });
     }
     else if( errorObj.statusCode == 403 ) {
-      return response.send(403);
+      return response.sendStatus(403);
     }
     else if( errorObj.statusCode == 500 ) {
-      return response.send(500);
+      return response.sendStatus(500);
     }
   });
 }
@@ -73,9 +79,6 @@ function createNewUser( userObj ) {
       deferred.reject(errorObj);
     }
     else if( user ) {
-      user = user.toObject();
-      delete user.password;
-
       deferred.resolve(user);
     }
     else {
@@ -93,6 +96,6 @@ function createNewUser( userObj ) {
 //////////////////////
 
 module.exports = {
-  signup: signup,
+  create: create,
   createNewUser: createNewUser
 };

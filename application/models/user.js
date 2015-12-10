@@ -1,21 +1,56 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-/* Schemas */
+
+////////////////////
+///// PARTIALS /////
+////////////////////
+
+var authActivitySchema = new Schema({
+  type: String,
+  action: String,
+  datetime: String,
+  environment: {
+    ipAddress: String,
+    device: String,
+    operatingSystem: String,
+    browser: String
+  },
+  location: {
+    latitude: String,
+    longitude: String
+  }
+});
+
+
+//////////////////
+///// SCHEMA /////
+//////////////////
+
 var userSchema  = new Schema({
-  first_name: String,
-  last_name: String,
+  firstName: String,
+  lastName: String,
   username: String,
   password: String,
   email: String,
   phone: String,
-  birthdate: Date,
+  birthDate: Date,
   facebookId: String,
-  isStaff: { type: Boolean, default: false }
+  isStaff: { type: Boolean, default: false },
+  authActivity: [authActivitySchema]
 });
 
-/* Models */
-// mongoose.model({MODEL-NAME}, {SCHEMA-OBJECT}, {COLLECTION-NAME})
-var userModel = mongoose.model('User', userSchema, 'Users');
 
-module.exports = userModel;
+/////////////////
+///// MODEL /////
+/////////////////
+
+// mongoose.model({MODEL-NAME}, {SCHEMA-OBJECT}, {COLLECTION-NAME})
+var User = mongoose.model('User', userSchema, 'Users');
+
+
+//////////////////////
+///// PUBLIC API /////
+//////////////////////
+
+module.exports = User;

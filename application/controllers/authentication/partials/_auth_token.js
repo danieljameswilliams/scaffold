@@ -1,4 +1,3 @@
-var User = require('../../../models/user.js');
 var AuthToken = require('../../../models/authtoken.js');
 
 var Q = require("q");

@@ -1,15 +1,28 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-/* Schemas */
+
+//////////////////
+///// SCHEMA /////
+//////////////////
+
 var authTokenSchema  = new Schema({
   user: { type: Schema.ObjectId, ref: 'User' },
   token: String,
   permission: String
 });
 
-/* Models */
-// mongoose.model({MODEL-NAME}, {SCHEMA-OBJECT}, {COLLECTION-NAME})
-var authTokenModel = mongoose.model('AuthToken', authTokenSchema, 'AuthTokens');
 
-module.exports = authTokenModel;
+/////////////////
+///// MODEL /////
+/////////////////
+
+// mongoose.model({MODEL-NAME}, {SCHEMA-OBJECT}, {COLLECTION-NAME})
+var AuthToken = mongoose.model('AuthToken', authTokenSchema, 'AuthTokens');
+
+
+//////////////////////
+///// PUBLIC API /////
+//////////////////////
+
+module.exports = AuthToken;

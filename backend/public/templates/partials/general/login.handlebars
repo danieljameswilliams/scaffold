@@ -1,17 +1,17 @@
 {{#if isLoggedIn}}
-    Hello {{ user.first_name }} {{ user.last_name }}
+    Hello {{ user.firstName }} {{ user.lastName }}
 {{/if}}
 
 {{#unless isLoggedIn}}
     <fieldset>
         <legend>Sign in as Staff</legend>
 
-        <form action="http://localhost:9000/auth/staff" method="POST">
+        <form action="http://localhost:9000/authenticate/staff" method="POST">
             <input type="hidden" name="redirect" value="http://localhost:8000/">
 
             <input type="text" name="username" value="mail@danielwilliams.dk"><br>
             <input type="password" name="password" value="password123"><br>
-            <button type="submit">Log ind</button>
+            <button type="submit">Login</button>
         </form>
     </fieldset>
 {{/unless}}

@@ -1,5 +1,9 @@
 List of users
-
-{{#each users}}
-    {{ hello }}
-{{/each}}
+<ul>
+    {{#each users}}
+    <li>
+        <span>{{#if isStaff}}[STAFF]{{/if}}</span>
+        <a href="/user/{{ _id }}">{{ firstName }} {{ lastName }}</a>
+    </li>
+    {{/each}}
+</ul>

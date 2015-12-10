@@ -2,7 +2,7 @@ var https = require('https');
 var Q = require("q");
 
 var User = require('../../../models/user.js');
-var authManual = require('./_auth_manual.js');
+var login = require('./../helpers/_login.js').login;
 var signupManual = require('./_signup_manual.js');
 
 
@@ -12,7 +12,7 @@ var signupManual = require('./_signup_manual.js');
  * .. So first we "validate", then we "login" or "create" a new user for him.
  * @return {HttpResponse}
  */
-function login( request, response ) {
+function authenticate( request, response ) {
   response.setHeader( 'Access-Control-Allow-Origin', '*' );
   response.setHeader( 'Access-Control-Allow-Credentials', true );
 
@@ -23,7 +23,7 @@ function login( request, response ) {
     var getUser = getOrCreateUser( accessToken, userId );
 
     getUser.then(function( user ) {
-      var getHttpResponse = authManual.buildHttpResponse( user, 'customer' );
+      var getHttpResponse = login( request, user, 'customer' );
 
       getHttpResponse.then(function( context ) {
         return response.json(context);
@@ -174,8 +174,8 @@ function _checkIfUserExistByEmail( facebookObj ) {
     }
     else {
       var userObj = {
-        first_name: facebookObj.first_name,
-        last_name: facebookObj.last_name,
+        firstName: facebookObj.first_name,
+        lastName: facebookObj.last_name,
         username: facebookObj.email,
         email: facebookObj.email,
         facebookId: facebookObj.id,
@@ -202,7 +202,7 @@ function _checkIfUserExistByEmail( facebookObj ) {
 //////////////////////
 
 module.exports = {
-  login: login,
+  authenticate: authenticate,
   getOrCreateUser: getOrCreateUser,
   validateFacebookToken: validateFacebookToken
 };

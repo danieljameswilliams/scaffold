@@ -1,13 +1,11 @@
 var passwordHash = require('password-hash');
-var crypto = require('crypto');
 var Q = require("q");
 
 var User = require('../../../models/user.js');
-var AuthToken = require('../../../models/authtoken.js');
-var authManual = require('./_auth_manual.js');
+var login = require('./../helpers/_login.js').login;
 
 
-function login( request, response ) {
+function authenticate( request, response ) {
   response.setHeader( 'Access-Control-Allow-Origin', '*' );
 
   var username = request.body.username;
@@ -16,19 +14,27 @@ function login( request, response ) {
   var getUser = fetchUser( username, password );
 
   getUser.then(function( user ) {
-    var getHttpResponse = authManual.buildHttpResponse( user, 'staff' );
+    var getHttpResponse = login( request, user, 'staff' );
 
     getHttpResponse.then(function( context ) {
-      return response.json(context);
+      if( !request.body.async && request.body.redirect ) {
+        return response.redirect( request.body.redirect );
+      }
+      else {
+        return response.json(context);
+      }
     });
   });
 
   getUser.fail(function( errorObj ) {
     if( errorObj.statusCode == 403 ) {
-      return response.send(403);
+      return response.sendStatus(403);
     }
     else if( errorObj.statusCode == 500 ) {
-      return response.send(500);
+      return response.sendStatus(500);
+    }
+    else if( errorObj.statusCode == 204 ) {
+      return response.sendStatus(204);
     }
   });
 }
@@ -39,6 +45,8 @@ function login( request, response ) {
 ////////////////////
 
 function fetchUser( username, password ) {
+  var deferred = Q.defer();
+
   User.findOne({ 'username': username, 'isStaff': true }, function( error, user ) {
     if( error ) {
       var errorObj = { 'statusCode': 500, 'message': error.message };
@@ -56,6 +64,8 @@ function fetchUser( username, password ) {
       deferred.reject(errorObj);
     }
   });
+
+  return deferred.promise;
 }
 
 
@@ -64,6 +74,6 @@ function fetchUser( username, password ) {
 //////////////////////
 
 module.exports = {
-  login: login,
+  authenticate: authenticate,
   getUser: fetchUser
 };

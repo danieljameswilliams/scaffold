@@ -66,7 +66,7 @@ App.Login = (function() {
   function getOrCreateUserInAPI( response ) {
     var userId = response.authResponse.userID;
     var accessToken = response.authResponse.accessToken;
-    var url = 'http://localhost:9000/auth/facebook';
+    var url = 'http://localhost:9000/authenticate/facebook';
 
     var formData = {
       'accessToken': accessToken,

@@ -1,5 +1,6 @@
 var http = require('http');
 var Q = require("q");
+var moment = require('moment');
 
 function page( request, response ) {
     var getUsers = fetchAllUsers();
@@ -9,8 +10,14 @@ function page( request, response ) {
         response.set( 'Cache-Control', 'no-store, no-cache' );
         response.set( 'Expires', '-1' );
 
+        var period_from = new Date();
+        var period_to = moment(period_from).add(-5, 'days').toDate();
+
+        var activeUsersInPeriod = getActiveUsersInPeriod( users, period_from, period_to );
+
         var context = {
-            users: users
+            users: users,
+            usersInPeriod: activeUsersInPeriod
         };
 
         if( request.query.async ) {
@@ -47,7 +54,7 @@ function fetchAllUsers() {
         response.on('end', function () {
             if( response.statusCode == 200 ) {
                 data = JSON.parse(data);
-                deferred.resolve(data.users);
+                deferred.resolve(data);
             }
             else if ( response.statusCode == 403 ) {
                 var errorObj = { 'statusCode': 403, 'message': data.statusMessage };
@@ -61,6 +68,10 @@ function fetchAllUsers() {
     });
 
     return deferred.promise;
+}
+
+function getActiveUsersInPeriod( users, period_from, period_to ) {
+    return 'Hello';
 }
 
 //////////////////////

@@ -1,10 +1,16 @@
-module.exports = function() {
-  return {
-    auth_token: require('./partials/_auth_token.js'),
-    auth_manual: require('./partials/_auth_manual.js'),
-    auth_facebook: require('./partials/_auth_facebook.js'),
-    auth_staff: require('./partials/_auth_staff.js'),
-    signup_manual: require('./partials/_signup_manual.js'),
-    add_facebook: require('./partials/_add_facebook.js')
+module.exports = {
+  authenticate: {
+    manual: require('./partials/_auth_manual.js').authenticate,
+    facebook: require('./partials/_auth_facebook.js').authenticate,
+    staff: require('./partials/_auth_staff.js').authenticate
+  },
+  create: {
+    manual: require('./partials/_signup_manual.js').create
+  },
+  add: {
+    facebook: require('./partials/_add_facebook.js').add
+  },
+  validate: {
+    token: require('./partials/_auth_token.js').validate
   }
-}();
+};

@@ -1,13 +1,25 @@
 module.exports = function( app, controllers, decorators ) {
-  // GET Requests
-  app.get( '/auth', controllers.authentication.auth_token.validate );
 
-  // POST Requests
-  app.post( '/auth/manual', controllers.authentication.auth_manual.login );
-  app.post( '/auth/facebook', controllers.authentication.auth_facebook.login );
-  app.post( '/auth/staff', controllers.authentication.auth_staff.login );
-  app.post( '/signup/manual', controllers.authentication.signup_manual.signup );
-  app.post( '/account/facebook', decorators.isAuth(controllers.authentication.add_facebook.add) );
+  ///////////////
+  ///// GET /////
+  ///////////////
 
-  // PUT Requests
+  app.get( '/authenticate', controllers.authentication.validate.token );
+
+
+  ////////////////
+  ///// POST /////
+  ////////////////
+
+  app.post( '/authenticate/manual', controllers.authentication.authenticate.manual );
+  app.post( '/authenticate/facebook', controllers.authentication.authenticate.facebook );
+  app.post( '/authenticate/staff', controllers.authentication.authenticate.staff );
+
+  app.post( '/create/manual', controllers.authentication.create.manual );
+  app.post( '/account/facebook', decorators.isAuth(controllers.authentication.add.facebook) );
+
+  ///////////////
+  ///// PUT /////
+  ///////////////
+
 };

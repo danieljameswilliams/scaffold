@@ -1,5 +1,6 @@
 var express = require('express');
 var exphbs = require('express-handlebars');
+var hbsHelpers = require('handlebars-helpers');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 

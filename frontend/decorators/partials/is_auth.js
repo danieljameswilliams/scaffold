@@ -36,23 +36,28 @@ function isAuth( callback ) {
 
 function _validateAuthToken( token ) {
   var deferred = Q.defer();
-  var url = 'http://localhost:9000/auth?permission=customer&token=' + token;
+  var url = 'http://localhost:9000/authenticate?permission=customer&token=' + token;
 
   http.get(url, function( response ) {
     response.setEncoding('binary');
     response.on('data', function ( data ) {
-      if( response.statusCode == 200 ) {
+      if( response.statusCode == 200 ) {0
         data = JSON.parse(data);
         deferred.resolve(data.user);
       }
       else if ( response.statusCode == 403 ) {
-        var errorObj = { 'statusCode': 403, 'message': data.message };
+        var errorObj = { 'statusCode': 403, 'message': data.statusMessage };
         deferred.reject(errorObj);
       }
       else {
         var errorObj = { 'statusCode': 500, 'message': data.message };
         deferred.reject(errorObj);
       }
+    });
+
+    response.on('error', function( error ) {
+      var errorObj = { 'statusCode': 500, 'message': error.message };
+      deferred.reject(errorObj);
     });
   });
 
@@ -64,4 +69,4 @@ function _validateAuthToken( token ) {
 ///// PUBLIC API /////
 //////////////////////
 
-module.exports = isAuth
+module.exports = isAuth;
