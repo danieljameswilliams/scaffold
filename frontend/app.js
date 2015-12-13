@@ -32,3 +32,4 @@ var decorators = require('./decorators/decorators.js')( app );
 var routes = require('./routes/routes.js')( app, controllers, decorators );
 
 app.listen(5000);
+console.log('Listening on port 5000');

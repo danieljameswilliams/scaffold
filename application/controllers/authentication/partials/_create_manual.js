@@ -4,6 +4,7 @@ var Q = require("q");
 var User = require('../../../models/user.js');
 var authManual = require('./_auth_manual.js');
 var login = require('./../helpers/_login.js').login;
+var createNewUser = require('./../helpers/_createNewUser.js');
 
 
 function create( request, response ) {
@@ -35,7 +36,7 @@ function create( request, response ) {
       var getNewUser = createNewUser( userObj );
 
       getNewUser.then(function( user ) {
-        var getHttpResponse = login( request, user, 'customer' );
+        var getHttpResponse = login( request, response, user, 'customer' );
 
         getHttpResponse.then(function( context ) {
           return response.json(context);
@@ -60,42 +61,10 @@ function create( request, response ) {
 }
 
 
-////////////////////
-///// PARTIALS /////
-////////////////////
-
-/**
- * We have now checked if there is already an account by FacebookID and by Email,
- * And now we can create a new User with already attached "facebookId"
- */
-function createNewUser( userObj ) {
-  var deferred = Q.defer();
-
-  var user = new User(userObj);
-
-  user.save(function( error, user ) {
-    if( error ) {
-      var errorObj = { 'statusCode': 500, 'message': error.message };
-      deferred.reject(errorObj);
-    }
-    else if( user ) {
-      deferred.resolve(user);
-    }
-    else {
-      var errorObj = { 'statusCode': 500, 'message': 'Saved user, but got no user in return.' };
-      deferred.reject(errorObj);
-    }
-  });
-
-  return deferred.promise;
-}
-
-
 //////////////////////
 ///// PUBLIC API /////
 //////////////////////
 
 module.exports = {
-  create: create,
-  createNewUser: createNewUser
+  create: create
 };

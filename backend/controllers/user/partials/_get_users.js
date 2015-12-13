@@ -1,37 +1,36 @@
 var http = require('http');
 var Q = require("q");
-var moment = require('moment');
+
 
 function page( request, response ) {
+    if( !request.user ) {
+        return response.sendStatus(403);
+    }
+
     var getUsers = fetchAllUsers();
 
     getUsers.then(function( users ) {
-        response.set( 'Content-Type', 'text/html' );
-        response.set( 'Cache-Control', 'no-store, no-cache' );
-        response.set( 'Expires', '-1' );
-
-        var period_from = new Date();
-        var period_to = moment(period_from).add(-5, 'days').toDate();
-
-        var activeUsersInPeriod = getActiveUsersInPeriod( users, period_from, period_to );
 
         var context = {
             users: users,
-            usersInPeriod: activeUsersInPeriod
+            userCount: users.length
         };
 
         if( request.query.async ) {
-            // We send some JSON to be handled in the frontend.
             return response.json( context );
         }
         else {
-            // We want to serve some pre-rendered HTML, due to either a server-request or noscript.
             return response.render('users', context);
         }
     });
 
-    getUsers.fail(function() {
-
+    getUsers.fail(function( errorObj ) {
+        if ( errorObj.statusCode == 403 ) {
+            return response.sendStatus(403);
+        }
+        else {
+            return response.sendStatus(500);
+        }
     });
 }
 
@@ -65,13 +64,14 @@ function fetchAllUsers() {
                 deferred.reject(errorObj);
             }
         });
+
+        response.on('error', function( error ) {
+            var errorObj = { 'statusCode': 500, 'message': error.message };
+            deferred.reject(errorObj);
+        });
     });
 
     return deferred.promise;
-}
-
-function getActiveUsersInPeriod( users, period_from, period_to ) {
-    return 'Hello';
 }
 
 //////////////////////

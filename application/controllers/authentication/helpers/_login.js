@@ -8,7 +8,7 @@ var AuthToken = require('../../../models/authtoken.js');
 /**
  * Lets actually login the user we have retrieved.
  */
-function login( request, user, permission ) {
+function login( request, response, user, permission ) {
     var deferred = Q.defer();
     var getUniqueToken = _generateUniqueToken();
 
@@ -18,6 +18,12 @@ function login( request, user, permission ) {
             token: token,
             permission: permission
         };
+
+        response.cookie( 'usertoken', token, {
+            maxAge: 900000,
+            httpOnly: false,
+            secure: false
+        });
 
         AuthToken.update({ 'user': user._id, 'permission': permission }, authTokenData, { upsert: true }, function( error ) {
             if( error ) {

@@ -61,6 +61,7 @@ function _addFacebookIdToManualUser( response, username, fbMeObj ) {
       deferred.reject(errorObj);
     }
     else if( user ) {
+      // TODO: Add a check if there is any other users using this ID already.
       user.facebookId = userId;
 
       user.save(function( saveErr ) {

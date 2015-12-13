@@ -16,6 +16,7 @@ module.exports = function( app, controllers, decorators ) {
   app.post( '/authenticate/staff', controllers.authentication.authenticate.staff );
 
   app.post( '/create/manual', controllers.authentication.create.manual );
+  app.post( '/create/staff', controllers.authentication.create.staff );
   app.post( '/account/facebook', decorators.isAuth(controllers.authentication.add.facebook) );
 
   ///////////////

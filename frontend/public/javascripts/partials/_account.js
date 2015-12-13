@@ -72,7 +72,7 @@ App.Account = (function() {
   function mergeFacebookToUserInAPI( response, username ) {
     var userId = response.authResponse.userID;
     var accessToken = response.authResponse.accessToken;
-    var url = '/api/account/facebook';
+    var url = 'http://localhost:9000/account/facebook';
 
     var formData = {
       'accessToken': accessToken,

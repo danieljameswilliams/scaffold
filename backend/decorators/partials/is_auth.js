@@ -4,14 +4,14 @@ var Q = require("q");
 
 function isAuth( callback ) {
     return function ( request, response ) {
-        var token = request.cookies.usertoken;
+        var token = request.cookies['usertoken'];
 
         if( token ) {
             var validateAuthToken = _validateAuthToken( token );
 
             validateAuthToken.then(function( user ) {
                 request.isLoggedIn = true;
-                request.user = user;
+                request.user = JSON.parse(user);
                 return callback( request, response );
             });
 
@@ -38,15 +38,20 @@ function _validateAuthToken( token ) {
     var deferred = Q.defer();
     var url = 'http://localhost:9000/authenticate?permission=staff&token=' + token;
 
+
     http.get(url, function( response ) {
-        response.setEncoding('binary');
-        response.on('data', function ( data ) {
+        var data = '';
+
+        response.on('data', function ( chunk ) {
+            data += chunk;
+        });
+
+        response.on('end', function () {
             if( response.statusCode == 200 ) {
-                data = JSON.parse(data);
-                deferred.resolve(data.user);
+                deferred.resolve(data);
             }
             else if ( response.statusCode == 403 ) {
-                var errorObj = { 'statusCode': 403, 'message': data.statusMessage };
+                var errorObj = { 'statusCode': 403, 'message': data.message };
                 deferred.reject(errorObj);
             }
             else {

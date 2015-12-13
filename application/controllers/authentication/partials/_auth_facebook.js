@@ -3,7 +3,7 @@ var Q = require("q");
 
 var User = require('../../../models/user.js');
 var login = require('./../helpers/_login.js').login;
-var signupManual = require('./_signup_manual.js');
+var createNewUser = require('./../helpers/_createNewUser.js');
 
 
 /**
@@ -23,7 +23,7 @@ function authenticate( request, response ) {
     var getUser = getOrCreateUser( accessToken, userId );
 
     getUser.then(function( user ) {
-      var getHttpResponse = login( request, user, 'customer' );
+      var getHttpResponse = login( request, response, user, 'customer' );
 
       getHttpResponse.then(function( context ) {
         return response.json(context);
@@ -181,7 +181,7 @@ function _checkIfUserExistByEmail( facebookObj ) {
         facebookId: facebookObj.id,
         isStaff: false
       };
-      var getNewUser = signupManual.createNewUser( userObj );
+      var getNewUser = createNewUser( userObj );
 
       getNewUser.then(function( user ) {
         deferred.resolve(user);

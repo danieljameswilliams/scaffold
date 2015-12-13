@@ -5,7 +5,8 @@ module.exports = {
     staff: require('./partials/_auth_staff.js').authenticate
   },
   create: {
-    manual: require('./partials/_signup_manual.js').create
+    manual: require('./partials/_create_manual.js').create,
+    staff: require('./partials/_create_staff.js').create
   },
   add: {
     facebook: require('./partials/_add_facebook.js').add

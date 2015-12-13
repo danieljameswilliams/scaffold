@@ -14,7 +14,7 @@ function authenticate( request, response ) {
     var getUser = getUserManual( username, password );
 
     getUser.then(function( user ) {
-        var getHttpResponse = login( request, user, 'customer' );
+        var getHttpResponse = login( request, response, user, 'customer' );
 
         getHttpResponse.then(function( context ) {
             return response.json(context);

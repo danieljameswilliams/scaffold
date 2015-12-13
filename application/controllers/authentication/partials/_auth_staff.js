@@ -14,7 +14,7 @@ function authenticate( request, response ) {
   var getUser = fetchUser( username, password );
 
   getUser.then(function( user ) {
-    var getHttpResponse = login( request, user, 'staff' );
+    var getHttpResponse = login( request, response, user, 'staff' );
 
     getHttpResponse.then(function( context ) {
       if( !request.body.async && request.body.redirect ) {
