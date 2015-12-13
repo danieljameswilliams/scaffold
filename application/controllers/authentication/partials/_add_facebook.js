@@ -22,25 +22,25 @@ function add( request, response ) {
       var saveToUser = _addFacebookIdToManualUser( response, username, facebookObj );
 
       saveToUser.then(function( manualObj ) {
-        return response.send(200);
+        return response.sendStatus(200);
       });
 
       saveToUser.fail(function( errorObj ) {
         if( errorObj.statusCode == 403 ) {
-          return response.send(403);
+          return response.sendStatus(403);
         }
         else if( errorObj.statusCode == 500 ) {
-          return response.send(500);
+          return response.sendStatus(500);
         }
       });
     });
 
     getFacebookData.fail(function( errorObj ) {
       if( errorObj.statusCode == 403 ) {
-        return response.send(403);
+        return response.sendStatus(403);
       }
       else if( errorObj.statusCode == 500 ) {
-        return response.send(500);
+        return response.sendStatus(500);
       }
     });
   }

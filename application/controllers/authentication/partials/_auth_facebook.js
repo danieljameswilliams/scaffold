@@ -32,15 +32,15 @@ function authenticate( request, response ) {
 
     getUser.fail(function( errorObj ) {
       if( errorObj.statusCode == 403 ) {
-        return response.send(403);
+        return response.sendStatus(403);
       }
       else if( errorObj.statusCode == 500 ) {
-        return response.send(500);
+        return response.sendStatus(500);
       }
     });
   }
   else {
-    return response.send(400);
+    return response.sendStatus(400);
   }
 }
 

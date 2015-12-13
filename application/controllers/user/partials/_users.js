@@ -12,7 +12,7 @@ function get( request, response ) {
 
     getUsers.fail(function( errorObj ) {
         if( errorObj.statusCode == 500 ) {
-            return response.send(500);
+            return response.sendStatus(500);
         }
     });
 }
