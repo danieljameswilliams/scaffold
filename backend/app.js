@@ -1,22 +1,25 @@
 var express = require('express');
 var exphbs = require('express-handlebars');
-var hbsHelpers = require('handlebars-helpers');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var nconf = require('nconf');
+
+
+nconf.argv().env().file({ file: 'configs/' + process.env['NODE_ENV'] + '.json' });
 
 var app = express();
 
 app.use(cookieParser())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-  extended: true
+    extended: true
 }));
 
 var templatesFolder = __dirname + '/public/templates';
 var hbs = exphbs.create({
-	layoutsDir: templatesFolder + '/layouts',
-	defaultLayout: templatesFolder + '/layouts/main',
-	partialsDir: templatesFolder + '/partials'
+    layoutsDir: templatesFolder + '/layouts',
+    defaultLayout: templatesFolder + '/layouts/main',
+    partialsDir: templatesFolder + '/partials'
 });
 
 // Register 'hbs.engine' with the Express app.
@@ -31,5 +34,5 @@ var controllers = require('./controllers/controllers.js')( app );
 var decorators = require('./decorators/decorators.js')( app );
 var routes = require('./routes/routes.js')( app, controllers, decorators );
 
-app.listen(8000);
-console.log('Listening on port 8000');
+app.listen( nconf.get('http:port') );
+console.log('Listening on port (%s)', nconf.get('http:port'));

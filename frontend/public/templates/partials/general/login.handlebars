@@ -11,9 +11,10 @@ Hello "{{ user.firstName }} {{ user.lastName }}"
 <br><br>
 
 <form action="http://localhost:9000/authenticate/manual" method="POST">
-  <input type="text" name="username" value="mail@danielwilliams.dk"><br>
-  <input type="password" name="password" value="password123"><br>
-  <button type="submit">Log ind</button>
+    <input type="hidden" name="fields" value="_id,username,firstName,lastName,email,facebookId">
+    <input type="text" name="username" value="mail@danielwilliams.dk"><br>
+    <input type="password" name="password" value="password123"><br>
+    <button type="submit">Log ind</button>
 </form>
 
 <br><br>

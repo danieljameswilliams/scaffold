@@ -1,5 +1,7 @@
 var http = require('http');
 var Q = require("q");
+var util = require("util");
+var nconf = require('nconf');
 
 
 function isAuth( callback ) {
@@ -7,7 +9,8 @@ function isAuth( callback ) {
         var token = request.cookies['usertoken'];
 
         if( token ) {
-            var validateAuthToken = _validateAuthToken( token );
+            var addToActivityLog = (_checkAndSetSessionCookie( request, response ) == false ? true : false);
+            var validateAuthToken = _validateAuthToken( token, addToActivityLog );
 
             validateAuthToken.then(function( user ) {
                 request.isLoggedIn = true;
@@ -34,10 +37,15 @@ function isAuth( callback ) {
 ///// PARTIALS /////
 ////////////////////
 
-function _validateAuthToken( token ) {
+function _validateAuthToken( token, addToActivityLog ) {
     var deferred = Q.defer();
-    var url = 'http://localhost:9000/authenticate?permission=customer&token=' + token;
-
+    var url = util.format('%s://%s/authenticate?permission=customer&token=%s&activity=%s&fields=%s',
+        nconf.get('api:protocol'),
+        nconf.get('api:host'),
+        token,
+        addToActivityLog,
+        '_id,username'
+    );
 
     http.get(url, function( response ) {
         var data = '';
@@ -67,6 +75,22 @@ function _validateAuthToken( token ) {
     });
 
     return deferred.promise;
+}
+
+function _checkAndSetSessionCookie( request, response ) {
+    var hasRegisteredSession = request.cookies['session'];
+
+    if( !Boolean(hasRegisteredSession) ) {
+        response.cookie( 'session', 'true', {
+            httpOnly: false,
+            secure: false
+        });
+
+        return false;
+    }
+    else {
+        return true;
+    }
 }
 
 

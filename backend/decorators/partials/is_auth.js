@@ -1,5 +1,7 @@
 var http = require('http');
 var Q = require("q");
+var util = require("util");
+var nconf = require('nconf');
 
 
 function isAuth( callback ) {
@@ -36,8 +38,11 @@ function isAuth( callback ) {
 
 function _validateAuthToken( token ) {
     var deferred = Q.defer();
-    var url = 'http://localhost:9000/authenticate?permission=staff&token=' + token;
-
+    var url = util.format('%s://%s/authenticate?permission=staff&token=%s',
+        nconf.get('api:protocol'),
+        nconf.get('api:host'),
+        token
+    );
 
     http.get(url, function( response ) {
         var data = '';

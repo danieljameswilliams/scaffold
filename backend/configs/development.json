@@ -1,0 +1,19 @@
+{
+  "environment": "development",
+  "env": "dev",
+  "api": {
+    "protocol": "http",
+    "host": "localhost:9000"
+  },
+  "backend": {
+    "protocol": "http",
+    "host": "localhost:8000"
+  },
+  "frontend": {
+    "protocol": "http",
+    "host": "localhost:5000"
+  },
+  "http": {
+    "port": 8000
+  }
+}

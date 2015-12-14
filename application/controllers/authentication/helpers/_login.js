@@ -1,8 +1,10 @@
 var crypto = require('crypto');
 var Q = require("q");
 var moment = require('moment');
+var extend = require('extend');
 
 var AuthToken = require('../../../models/authtoken.js');
+var helpers = require('../../../helpers/helpers.js');
 
 
 /**
@@ -19,11 +21,18 @@ function login( request, response, user, permission ) {
             permission: permission
         };
 
-        response.cookie( 'usertoken', token, {
-            maxAge: 900000,
-            httpOnly: false,
-            secure: false
-        });
+        try {
+            // TODO: Set cookie to expire in 365 days, not run out in session.
+            response.cookie( 'usertoken', token, {
+                httpOnly: false,
+                secure: false
+            });
+        }
+        catch( error ) {
+            var errorObj = { 'statusCode': 500, 'message': error.message };
+            console.log(error);
+            deferred.reject(errorObj);
+        }
 
         AuthToken.update({ 'user': user._id, 'permission': permission }, authTokenData, { upsert: true }, function( error ) {
             if( error ) {
@@ -33,8 +42,12 @@ function login( request, response, user, permission ) {
 
         updateAuthActivity( request, user );
 
+        // Clean the user model for redundant info,
+        var fields = request.body.fields;
+        var userObj = helpers.cleanModel(user, fields);
+
         context = {
-            user: user,
+            user: userObj,
             token: token
         };
 
@@ -68,7 +81,7 @@ function _generateUniqueToken() {
  * Add a line to the users Authentication Activity,
  * .. to keep a log of when and where the user has been used.
  */
-function updateAuthActivity( request, user ) {
+function updateAuthActivity( request, user, overrides ) {
     var deferred = Q.defer();
 
     var authActivityData = {
@@ -86,6 +99,8 @@ function updateAuthActivity( request, user ) {
             longitude: ''
         }
     };
+
+    extend(authActivityData, authActivityData, overrides);
 
     user.authActivity.push( authActivityData );
 

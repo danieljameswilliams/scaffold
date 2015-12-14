@@ -1,24 +1,33 @@
 var http = require('http');
 var Q = require("q");
+var util = require("util");
+var nconf = require('nconf');
 
 
 function isAuth( callback ) {
     return function ( request, response ) {
         var token = request.cookies['usertoken'];
 
-        var validateAuthToken = _validateAuthToken( token );
+        if( token ) {
+            var validateAuthToken = _validateAuthToken( token );
 
-        validateAuthToken.then(function( user ) {
-            request.isLoggedIn = true;
-            request.user = JSON.parse(user);
-            return callback( request, response );
-        });
+            validateAuthToken.then(function( user ) {
+                request.isLoggedIn = true;
+                request.user = JSON.parse(user);
+                return callback( request, response );
+            });
 
-        validateAuthToken.fail(function( errorObj ) {
+            validateAuthToken.fail(function( errorObj ) {
+                request.isLoggedIn = false;
+                request.user = null;
+                return callback( request, response );
+            });
+        }
+        else {
             request.isLoggedIn = false;
             request.user = null;
             return callback( request, response );
-        });
+        }
     };
 }
 
@@ -29,7 +38,10 @@ function isAuth( callback ) {
 
 function _validateAuthToken( token ) {
     var deferred = Q.defer();
-    var url = 'http://localhost:9000/authenticate';
+    var url = util.format('%s://%s/authenticate',
+        nconf.get('api:protocol'),
+        nconf.get('api:host')
+    );
 
 
     http.get(url, function( response ) {
@@ -67,4 +79,4 @@ function _validateAuthToken( token ) {
 ///// PUBLIC API /////
 //////////////////////
 
-module.exports = isAuth
+module.exports = isAuth;

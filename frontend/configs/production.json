@@ -1,0 +1,19 @@
+{
+  "environment": "production",
+  "env": "prod",
+  "api": {
+    "protocol": "https",
+    "host": "api.scaffold.com"
+  },
+  "backend": {
+    "protocol": "https",
+    "host": "backend.scaffold.com"
+  },
+  "frontend": {
+    "protocol": "https",
+    "host": "www.scaffold.com"
+  },
+  "http": {
+    "port": 5000
+  }
+}

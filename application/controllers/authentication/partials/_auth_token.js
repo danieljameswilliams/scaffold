@@ -1,18 +1,29 @@
-var AuthToken = require('../../../models/authtoken.js');
-
 var Q = require("q");
 
+var AuthToken = require('../../../models/authtoken.js');
+var login = require('../helpers/_login.js');
+var helpers = require('../../../helpers/helpers.js');
 
-function validateAuthToken( request, response ) {
+
+function validate( request, response ) {
     response.setHeader( 'Access-Control-Allow-Origin', '*' );
 
-    var token = request.query.token;
-    var permission = request.query.permission;
+    var fields = request.query['fields'];
+    var token = request.query['token'];
+    var permission = request.query['permission'];
+    var addToActivity = request.query['activity'];
 
     var getAuthToken = _getAuthToken( token, permission );
 
     getAuthToken.then(function( tokenResponse ) {
-        return response.json( tokenResponse.user.toObject() );
+        var user = tokenResponse.user;
+
+        if( addToActivity == 'true' ) {
+            login.updateAuthActivity( request, user, { type: 'partial' } );
+        }
+
+        var userObj = helpers.cleanModel(user, fields);
+        return response.json( userObj );
     });
 
     getAuthToken.fail(function( errorObj ) {
@@ -56,5 +67,5 @@ function _getAuthToken( token, permission ) {
 //////////////////////
 
 module.exports = {
-    validate: validateAuthToken,
+    validate: validate
 };

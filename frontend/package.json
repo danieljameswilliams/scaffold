@@ -19,6 +19,7 @@
   "dependencies": {
     "express": "^4.12.3",
     "express-handlebars": "^2.0.1",
+    "nconf": "^0.8.2",
     "q": "^1.4.1"
   }
 }
