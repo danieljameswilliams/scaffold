@@ -5,11 +5,9 @@ var helpers = require('helpers/helpers.js');
 
 
 function create( request, response ) {
-    var fields = 'userId, username, email, firstName, lastName';
     var url = util.format('%s://%s/account/facebook', nconf.get('api:protocol'), nconf.get('api:host'));
 
     var postData = {
-        fields: fields,
         accessToken: request.body['accessToken'],
         userId: request.body['userId'],
         username: request.body['username']
@@ -22,9 +20,7 @@ function create( request, response ) {
         body: postData
     });
 
-    requestResponse.then(function( result ) {
-        var token = result.token;
-
+    requestResponse.then(function() {
         return response.sendStatus(200);
     });
 

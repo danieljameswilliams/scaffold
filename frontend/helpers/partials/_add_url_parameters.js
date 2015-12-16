@@ -12,15 +12,15 @@ function httpRequest( url, parameters ) {
 ////////////////////
 
 function _serialize( parameters ) {
-    var str = [];
+    var querystring = [];
 
     for( var param in parameters ) {
         if ( parameters.hasOwnProperty(param) ) {
-            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(parameters[param]));
+            querystring.push(encodeURIComponent(param) + "=" + encodeURIComponent(parameters[param]));
         }
     }
 
-    return str.join('&');
+    return querystring.join('&');
 }
 
 

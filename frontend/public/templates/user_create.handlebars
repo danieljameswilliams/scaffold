@@ -4,7 +4,7 @@
     <button type="submit" class="login__facebook-button js-login__facebook-button">Signup with Facebook</button>
 
     <form action="/create/manual" method="POST">
-        <input type="hidden" name="redirect" value="/">
+        <input type="hidden" name="redirect" value="/?fallback=true&action=newUser">
 
         <input type="text" name="firstName" value="Daniel"><br>
         <input type="text" name="lastName" value="Williams"><br>

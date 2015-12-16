@@ -14,7 +14,7 @@ function isAuth( callback ) {
 
             validateAuthToken.then(function( user ) {
                 request.isLoggedIn = true;
-                request.user = JSON.parse(user);
+                request.user = user;
                 return callback( request, response );
             });
 

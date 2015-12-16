@@ -5,7 +5,7 @@ var helpers = require('helpers/helpers.js');
 
 
 function create( request, response ) {
-    var fields = 'userId, username, email, firstName, lastName';
+    var fields = 'userId, username, email, firstName, lastName, facebookId';
     var url = util.format('%s://%s/authenticate/facebook', nconf.get('api:protocol'), nconf.get('api:host'));
 
     var postData = {

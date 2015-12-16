@@ -15,7 +15,7 @@ function isAuth( callback ) {
 
             validateAuthToken.then(function( user ) {
                 request.isLoggedIn = true;
-                request.user = JSON.parse(user);
+                request.user = user;
                 return callback( request, response );
             });
 
@@ -41,7 +41,7 @@ function isAuth( callback ) {
 function _validateAuthToken( token, addToActivityLog ) {
     var deferred = Q.defer();
 
-    var fields = 'userId, username, email, firstName, lastName';
+    var fields = 'userId, username, email, firstName, lastName, facebookId';
     var url = util.format('%s://%s/authenticate', nconf.get('api:protocol'), nconf.get('api:host'));
     var parameters = {
         fields: fields,

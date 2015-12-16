@@ -41,6 +41,10 @@ function login( request, response, user, permission ) {
         deferred.resolve(context);
     });
 
+    getUniqueToken.fail(function(errorObj) {
+        deferred.reject(errorObj);
+    });
+
     return deferred.promise;
 }
 
@@ -59,6 +63,9 @@ function _generateUniqueToken() {
     crypto.randomBytes(48, function(ex, buf) {
         var token = buf.toString('hex');
         deferred.resolve(token);
+    }, function() {
+        var errorObj = { 'statusCode': 500, 'message': 'Crypto failed' };
+        deferred.reject(errorObj);
     });
 
     return deferred.promise;

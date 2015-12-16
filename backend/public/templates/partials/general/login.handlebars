@@ -7,7 +7,7 @@
         <legend>Sign in as Staff</legend>
 
         <form action="/authenticate/staff" method="POST">
-            <input type="hidden" name="redirect" value="/">
+            <input type="hidden" name="redirect" value="/?fallback=true&action=login">
 
             <input type="text" name="username" value="mail@danielwilliams.dk"><br>
             <input type="password" name="password" value="password123"><br>

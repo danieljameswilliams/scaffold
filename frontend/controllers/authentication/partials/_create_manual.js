@@ -32,7 +32,7 @@ function create( request, response ) {
         });
 
         if( request.body['redirect'] ) {
-            return response.json(request.body['redirect']);
+            return response.redirect(request.body['redirect']);
         }
         else {
             return response.json(result);
