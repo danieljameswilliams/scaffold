@@ -13,4 +13,9 @@ function cleanModel( model, fields ) {
     return cleanedObj;
 }
 
+
+//////////////////////
+///// PUBLIC API /////
+//////////////////////
+
 module.exports = cleanModel;

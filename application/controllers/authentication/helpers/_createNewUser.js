@@ -1,6 +1,6 @@
 var Q = require("q");
 
-var User = require('../../../models/user.js');
+var User = require('models/user.js');
 
 
 function createNewUser( userObj ) {

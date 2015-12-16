@@ -1,5 +1,3 @@
-module.exports = function() {
-  return {
+module.exports = {
     isAuth: require('./partials/is_auth.js')
-  }
-}
+};

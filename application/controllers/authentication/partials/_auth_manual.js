@@ -1,8 +1,8 @@
 var passwordHash = require('password-hash');
 var Q = require("q");
 
-var User = require('../../../models/user.js');
-var login = require('./../helpers/_login.js').login;
+var User = require('models/user.js');
+var login = require('../helpers/_login.js').login;
 
 
 function authenticate( request, response ) {
@@ -47,7 +47,7 @@ function getUserManual( username, password ) {
             var errorObj = { 'statusCode': 500, 'message': error.message };
             deferred.reject(errorObj);
         }
-        else if( user && !passwordHash.verify(password, user.password) ) {
+        else if( user && password && !passwordHash.verify(password, user.password) ) {
             var errorObj = { 'statusCode': 403, 'message': 'Password is incorrect' };
             deferred.reject(errorObj);
         }

@@ -3,8 +3,8 @@ var Q = require("q");
 var moment = require('moment');
 var extend = require('extend');
 
-var AuthToken = require('../../../models/authtoken.js');
-var helpers = require('../../../helpers/helpers.js');
+var AuthToken = require('models/authtoken.js');
+var helpers = require('helpers/helpers.js');
 
 
 /**

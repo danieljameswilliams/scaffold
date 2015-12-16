@@ -1,9 +1,9 @@
 var https = require('https');
 var Q = require("q");
 
-var User = require('../../../models/user.js');
-var login = require('./../helpers/_login.js').login;
-var createNewUser = require('./../helpers/_createNewUser.js');
+var User = require('models/user.js');
+var login = require('../helpers/_login.js').login;
+var createNewUser = require('../helpers/_createNewUser.js');
 
 
 /**

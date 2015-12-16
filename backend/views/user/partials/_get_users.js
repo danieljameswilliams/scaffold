@@ -1,5 +1,8 @@
 var http = require('http');
 var Q = require("q");
+var nconf = require('nconf');
+
+var helpers = require('helpers/helpers.js');
 
 
 function page( request, response ) {
@@ -41,34 +44,20 @@ function page( request, response ) {
 
 function fetchAllUsers() {
     var deferred = Q.defer();
-    var url = 'http://localhost:9000/users';
+    var url = util.format('%s://%s/users', nconf.get('api:protocol'), nconf.get('api:host'));
 
-    http.get(url, function( response ) {
-        var data = '';
+    var requestResponse = helpers.httpRequest({
+        url: url,
+        method: 'GET',
+        json: true
+    });
 
-        response.on('data', function (chunk) {
-            data += chunk;
-        });
+    requestResponse.then(function( body ) {
+        deferred.resolve(body);
+    });
 
-        response.on('end', function () {
-            if( response.statusCode == 200 ) {
-                data = JSON.parse(data);
-                deferred.resolve(data);
-            }
-            else if ( response.statusCode == 403 ) {
-                var errorObj = { 'statusCode': 403, 'message': data.statusMessage };
-                deferred.reject(errorObj);
-            }
-            else {
-                var errorObj = { 'statusCode': 500, 'message': data.message };
-                deferred.reject(errorObj);
-            }
-        });
-
-        response.on('error', function( error ) {
-            var errorObj = { 'statusCode': 500, 'message': error.message };
-            deferred.reject(errorObj);
-        });
+    requestResponse.fail(function( errorObj ) {
+        deferred.reject(errorObj);
     });
 
     return deferred.promise;

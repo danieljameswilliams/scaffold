@@ -1,9 +1,4 @@
-// In this main file, we instanciate all controllers to the global controllers object.
-// Every controller has it's own folder, to split each function into a seperate file, for less code in a single file.
-
-module.exports = function() {
-  return {
-    authentication: require('./authentication/authentication.js'),
-    user: require('./user/user.js')
-  }
-}
+module.exports = {
+  authentication: require('./authentication/authentication.js'),
+  user: require('./user/user.js')
+};

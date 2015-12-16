@@ -1,8 +1,8 @@
 var passwordHash = require('password-hash');
 var Q = require("q");
 
-var User = require('../../../models/user.js');
-var login = require('./../helpers/_login.js').login;
+var User = require('models/user.js');
+var login = require('../helpers/_login.js').login;
 
 
 function authenticate( request, response ) {

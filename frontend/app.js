@@ -30,9 +30,10 @@ app.set('views', templatesFolder);
 // Set the public folder as the static folder
 app.use( express.static(__dirname + '/public') );
 
-var controllers = require('./controllers/controllers.js')( app );
-var decorators = require('./decorators/decorators.js')( app );
-var routes = require('./routes/routes.js')( app, controllers, decorators );
+var controllers = require('./controllers/controllers.js');
+var views = require('./views/views.js');
+var decorators = require('./decorators/decorators.js');
+var routes = require('./routes/routes.js')( app, controllers, views, decorators );
 
 app.listen( nconf.get('http:port') );
 console.log('Listening on port (%s)', nconf.get('http:port'));

@@ -1,7 +1,8 @@
-var http = require('http');
 var Q = require("q");
 var util = require("util");
 var nconf = require('nconf');
+
+var helpers = require('helpers/helpers.js');
 
 
 function isAuth( callback ) {
@@ -38,37 +39,27 @@ function isAuth( callback ) {
 
 function _validateAuthToken( token ) {
     var deferred = Q.defer();
-    var url = util.format('%s://%s/authenticate?permission=staff&token=%s',
-        nconf.get('api:protocol'),
-        nconf.get('api:host'),
-        token
-    );
 
-    http.get(url, function( response ) {
-        var data = '';
+    var fields = 'userId, username, email, firstName, lastName';
+    var url = util.format('%s://%s/authenticate', nconf.get('api:protocol'), nconf.get('api:host'));
+    var parameters = {
+        fields: fields,
+        permission: 'staff',
+        token: token
+    };
 
-        response.on('data', function ( chunk ) {
-            data += chunk;
-        });
+    var requestResponse = helpers.httpRequest({
+        url: helpers.addUrlParameters(url, parameters),
+        method: 'GET',
+        json: true
+    });
 
-        response.on('end', function () {
-            if( response.statusCode == 200 ) {
-                deferred.resolve(data);
-            }
-            else if ( response.statusCode == 403 ) {
-                var errorObj = { 'statusCode': 403, 'message': data.message };
-                deferred.reject(errorObj);
-            }
-            else {
-                var errorObj = { 'statusCode': 500, 'message': data.message };
-                deferred.reject(errorObj);
-            }
-        });
+    requestResponse.then(function( user ) {
+        deferred.resolve(user);
+    });
 
-        response.on('error', function( error ) {
-            var errorObj = { 'statusCode': 500, 'message': error.message };
-            deferred.reject(errorObj);
-        });
+    requestResponse.fail(function( errorObj ) {
+        deferred.reject(errorObj);
     });
 
     return deferred.promise;

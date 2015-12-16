@@ -1,8 +1,8 @@
 var Q = require("q");
 
-var AuthToken = require('../../../models/authtoken.js');
-var login = require('../helpers/_login.js');
-var helpers = require('../../../helpers/helpers.js');
+var AuthToken = require('models/authtoken.js');
+var helpers = require('helpers/helpers.js');
+var updateAuthActivity = require('../helpers/_login.js').updateAuthActivity;
 
 
 function validate( request, response ) {
@@ -19,7 +19,7 @@ function validate( request, response ) {
         var user = tokenResponse.user;
 
         if( addToActivity == 'true' ) {
-            login.updateAuthActivity( request, user, { type: 'partial' } );
+            updateAuthActivity( request, user, { type: 'partial' } );
         }
 
         var userObj = helpers.cleanModel(user, fields);

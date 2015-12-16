@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var autoIncrement = require('mongoose-auto-increment');
 
 
 ////////////////////
@@ -7,19 +8,19 @@ var Schema = mongoose.Schema;
 ////////////////////
 
 var authActivitySchema = new Schema({
-  type: String,
-  action: String,
-  datetime: String,
-  environment: {
-    ipAddress: String,
-    device: String,
-    operatingSystem: String,
-    browser: String
-  },
-  location: {
-    latitude: String,
-    longitude: String
-  }
+    type: String,
+    action: String,
+    datetime: String,
+    environment: {
+        ipAddress: String,
+        device: String,
+        operatingSystem: String,
+        browser: String
+    },
+    location: {
+        latitude: String,
+        longitude: String
+    }
 });
 
 
@@ -28,18 +29,20 @@ var authActivitySchema = new Schema({
 //////////////////
 
 var userSchema  = new Schema({
-  firstName: String,
-  lastName: String,
-  username: String,
-  password: String,
-  email: String,
-  phone: String,
-  birthDate: Date,
-  facebookId: String,
-  isStaff: { type: Boolean, default: false },
-  authActivity: [authActivitySchema]
+    firstName: String,
+    lastName: String,
+    username: String,
+    password: String,
+    email: String,
+    phone: String,
+    birthDate: Date,
+    facebookId: String,
+    isStaff: { type: Boolean, default: false },
+    authActivity: [authActivitySchema]
 });
 
+
+userSchema.plugin(autoIncrement.plugin, { model: 'User', field: 'userId', startAt: 1 });
 
 /////////////////
 ///// MODEL /////
