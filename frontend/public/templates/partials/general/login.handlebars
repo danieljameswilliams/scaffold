@@ -1,24 +1,25 @@
 {{#if isLoggedIn}}
-Hello "{{ user.firstName }} {{ user.lastName }}"
-<button class="js-account__logout-button">Log out</button>
+    Hello "{{ user.firstName }} {{ user.lastName }}"
+    <button class="js-account__logout-button">Log out</button>
 
-{{#unless user.facebookId}}
-<button class="js-account__facebook-button" data-username="{{ user.username }}">Add Facebook Account</button>
-{{/unless}}
+    {{#unless user.facebookId}}
+        <button class="js-account__facebook-button" data-username="{{ user.username }}">Add Facebook Account</button>
+    {{/unless}}
 {{else}}
-<button type="submit" class="login__facebook-button js-login__facebook-button">Login with Facebook</button>
+    <button type="submit" class="login__facebook-button js-login__facebook-button">Login with Facebook</button>
 
-<br><br>
+    <br><br>
 
-<form action="http://localhost:9000/authenticate/manual" method="POST">
-    <input type="hidden" name="fields" value="_id,username,firstName,lastName,email,facebookId">
-    <input type="text" name="username" value="mail@danielwilliams.dk"><br>
-    <input type="password" name="password" value="password123"><br>
-    <button type="submit">Log ind</button>
-</form>
+    <form action="/authenticate/manual" method="POST">
+        <input type="hidden" name="redirect" value="/">
 
-<br><br>
+        <input type="text" name="username" value="mail@danielwilliams.dk"><br>
+        <input type="password" name="password" value="password123"><br>
+        <button type="submit">Sign in</button>
+    </form>
 
-<a href="/bruger/opret">Opret bruger</a>
-<a href="/bruger/glemt">Glemt kodeord?</a>
+    <br><br>
+
+    <a href="/bruger/opret">Sign up</a>
+    <a href="/bruger/glemt">Forgot password?</a>
 {{/if}}

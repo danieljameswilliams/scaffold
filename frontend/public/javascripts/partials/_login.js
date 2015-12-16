@@ -66,11 +66,11 @@ App.Login = (function() {
   function getOrCreateUserInAPI( response ) {
     var userId = response.authResponse.userID;
     var accessToken = response.authResponse.accessToken;
-    var url = 'http://localhost:9000/authenticate/facebook';
+    var url = '/authenticate/facebook';
 
     var formData = {
-      'accessToken': accessToken,
-      'userId': userId
+      accessToken: accessToken,
+      userId: userId
     };
 
     var request = $.post( url, formData );

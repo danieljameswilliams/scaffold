@@ -1,4 +1,3 @@
-var request = require("request");
 var util = require("util");
 var nconf = require('nconf');
 
@@ -32,11 +31,18 @@ function create( request, response ) {
             secure: false
         });
 
-        return response.json(result);
+        if( request.body['redirect'] ) {
+            return response.json(request.body['redirect']);
+        }
+        else {
+            return response.json(result);
+        }
     });
 
     requestResponse.fail(function( errorObj ) {
         var errorMessage = errorObj.message;
+
+        // TODO: Make User Creation ASYNC in client.
         return response.redirect('/bruger/opret?error=' + errorMessage);
     });
 }

@@ -72,12 +72,12 @@ App.Account = (function() {
   function mergeFacebookToUserInAPI( response, username ) {
     var userId = response.authResponse.userID;
     var accessToken = response.authResponse.accessToken;
-    var url = 'http://localhost:9000/account/facebook';
+    var url = '/account/facebook';
 
     var formData = {
-      'accessToken': accessToken,
-      'userId': userId,
-      'username': username
+      accessToken: accessToken,
+      userId: userId,
+      username: username
     };
 
     var request = $.post( url, formData );

@@ -1,6 +1,9 @@
 var inquirer = require("inquirer");
 var request = require("request");
+var util = require("util");
 var Q = require("q");
+var nconf = require('nconf');
+
 
 var questions = [
     {
@@ -53,7 +56,7 @@ function _createStaffUser( userData, guid ) {
     userData.guid = guid;
 
     request({
-        url: 'http://localhost:9000/create/staff',
+        url: util.format('%s://%s/create/staff', nconf.get('api:protocol'), nconf.get('api:host')),
         method: 'POST',
         json: true,
         body: userData

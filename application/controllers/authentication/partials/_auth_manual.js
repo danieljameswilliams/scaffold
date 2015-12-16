@@ -11,27 +11,33 @@ function authenticate( request, response ) {
     var username = request.body.username;
     var password = request.body.password;
 
-    var getUser = getUserManual( username, password );
 
-    getUser.then(function( user ) {
-        var getHttpResponse = login( request, response, user, 'customer' );
+    if( username && password ) {
+        var getUser = getUserManual( username, password );
 
-        getHttpResponse.then(function( context ) {
-            return response.json(context);
+        getUser.then(function( user ) {
+            var getHttpResponse = login( request, response, user, 'customer' );
+
+            getHttpResponse.then(function( context ) {
+                return response.json(context);
+            });
         });
-    });
 
-    getUser.fail(function( errorObj ) {
-        if( errorObj.statusCode == 403 ) {
-            return response.sendStatus(403);
-        }
-        else if( errorObj.statusCode == 204 ) {
-            return response.sendStatus(403);
-        }
-        else if( errorObj.statusCode == 500 ) {
-            return response.sendStatus(500);
-        }
-    });
+        getUser.fail(function( errorObj ) {
+            if( errorObj.statusCode == 403 ) {
+                return response.sendStatus(403);
+            }
+            else if( errorObj.statusCode == 204 ) {
+                return response.sendStatus(403);
+            }
+            else if( errorObj.statusCode == 500 ) {
+                return response.sendStatus(500);
+            }
+        });
+    }
+    else {
+        return response.sendStatus(400);
+    }
 }
 
 

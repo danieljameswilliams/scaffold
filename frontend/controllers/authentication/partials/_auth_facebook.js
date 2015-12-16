@@ -4,14 +4,14 @@ var nconf = require('nconf');
 var helpers = require('helpers/helpers.js');
 
 
-function authenticate( request, response ) {
+function create( request, response ) {
     var fields = 'userId, username, email, firstName, lastName';
-    var url = util.format('%s://%s/authenticate/staff', nconf.get('api:protocol'), nconf.get('api:host'));
+    var url = util.format('%s://%s/authenticate/facebook', nconf.get('api:protocol'), nconf.get('api:host'));
 
     var postData = {
         fields: fields,
-        username: request.body['username'],
-        password: request.body['password']
+        accessToken: request.body['accessToken'],
+        userId: request.body['userId']
     };
 
     var requestResponse = helpers.httpRequest({
@@ -33,8 +33,15 @@ function authenticate( request, response ) {
     });
 
     requestResponse.fail(function( errorObj ) {
-        var errorMessage = errorObj.message;
-        return response.redirect('/?error=' + errorMessage);
+        if( errorObj.statusCode == 403 ) {
+            return response.sendStatus(403);
+        }
+        else if( errorObj.statusCode == 400 ) {
+            return response.sendStatus(400);
+        }
+        else {
+            return response.sendStatus(500);
+        }
     });
 }
 
@@ -43,4 +50,4 @@ function authenticate( request, response ) {
 ///// PUBLIC API /////
 //////////////////////
 
-module.exports = authenticate;
+module.exports = create;
