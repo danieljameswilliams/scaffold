@@ -29,7 +29,12 @@ function authenticate( request, response ) {
             secure: false
         });
 
-        return response.json(result);
+        if( request.body['redirect'] ) {
+            return response.json(request.body['redirect']);
+        }
+        else {
+            return response.json(result);
+        }
     });
 
     requestResponse.fail(function( errorObj ) {
