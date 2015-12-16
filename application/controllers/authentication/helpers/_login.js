@@ -21,19 +21,6 @@ function login( request, response, user, permission ) {
             permission: permission
         };
 
-        try {
-            // TODO: Set cookie to expire in 365 days, not run out in session.
-            response.cookie( 'usertoken', token, {
-                httpOnly: false,
-                secure: false
-            });
-        }
-        catch( error ) {
-            var errorObj = { 'statusCode': 500, 'message': error.message };
-            console.log(error);
-            deferred.reject(errorObj);
-        }
-
         AuthToken.update({ 'user': user._id, 'permission': permission }, authTokenData, { upsert: true }, function( error ) {
             if( error ) {
                 console.log(error);

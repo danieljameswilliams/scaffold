@@ -17,12 +17,7 @@ function authenticate( request, response ) {
     var getHttpResponse = login( request, response, user, 'staff' );
 
     getHttpResponse.then(function( context ) {
-      if( !request.body.async && request.body.redirect ) {
-        return response.redirect( request.body.redirect );
-      }
-      else {
-        return response.json(context);
-      }
+      return response.json(context);
     });
   });
 

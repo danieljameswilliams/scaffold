@@ -5,14 +5,12 @@ var nconf = require('nconf');
 var helpers = require('helpers/helpers.js');
 
 
-function create( request, response ) {
+function authenticate( request, response ) {
     var fields = 'userId, username, email, firstName, lastName';
-    var url = util.format('%s://%s/create/manual', nconf.get('api:protocol'), nconf.get('api:host'));
+    var url = util.format('%s://%s/authenticate/staff', nconf.get('api:protocol'), nconf.get('api:host'));
 
     var postData = {
         fields: fields,
-        firstName: request.body['firstName'],
-        lastName: request.body['lastName'],
         username: request.body['username'],
         password: request.body['password']
     };
@@ -37,7 +35,7 @@ function create( request, response ) {
 
     requestResponse.fail(function( errorObj ) {
         var errorMessage = errorObj.message;
-        return response.redirect('/bruger/opret?error=' + errorMessage);
+        return response.redirect('/?error=' + errorMessage);
     });
 }
 
@@ -46,4 +44,4 @@ function create( request, response ) {
 ///// PUBLIC API /////
 //////////////////////
 
-module.exports = create;
+module.exports = authenticate;

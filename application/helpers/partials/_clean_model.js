@@ -2,7 +2,7 @@ function cleanModel( model, fields ) {
     var modelObj = model.toObject();
     var cleanedObj = {};
 
-    fields = fields.replace(' ', '').split(',');
+    fields = fields.replace(/\s/g, '').split(',');
 
     for( var i = 0; i < fields.length; i++ ) {
         var field = fields[i];
