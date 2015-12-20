@@ -1,34 +1,30 @@
 var express = require('express');
-var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var nconf = require('nconf');
-var autoIncrement = require('mongoose-auto-increment');
+
+var helpers = require('helpers/helpers.js');
 
 
 nconf.argv().env().file({ file: 'configs/' + process.env['NODE_ENV'] + '.json' });
 
 var app = express();
-
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-var client = mongoose.connect('mongodb://localhost:27017/local');
-var db = mongoose.connection;
+var getDatabaseConnection = helpers.connectDatabase();
 
-autoIncrement.initialize(db);
-
-db.once('open', function() {
+getDatabaseConnection.then(function() {
     var controllers = require('./controllers/controllers.js');
     var decorators = require('./decorators/decorators.js');
     var routes = require('./routes/routes.js')( app, controllers, decorators );
 });
 
-db.once('error', function( err ) {
-    console.log('Database: %s', err.message);
+getDatabaseConnection.fail(function( error ) {
+    console.log('Database: %s', error.message);
 });
 
 app.listen( nconf.get('http:port') );
