@@ -27,7 +27,9 @@ function login( request, response, user, permission ) {
             }
         });
 
-        updateAuthActivity( request, user );
+        if( permission !== 'test' ) {
+            updateAuthActivity( request, user );
+        }
 
         // Clean the user model for redundant info,
         var fields = request.body.fields;

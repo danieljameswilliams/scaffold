@@ -1,5 +1,4 @@
 var assert = require('assert');
-var Q = require("q");
 
 var helpers = require('helpers/helpers.js');
 
@@ -10,7 +9,7 @@ function test( done ) {
     var getDatabaseConnection = helpers.connectDatabase();
 
     getDatabaseConnection.then(function() {
-        var getTestUser = _getTestUser();
+        var getTestUser = helpers.getTestUser();
 
         getTestUser.then(function( user ) {
             try {
@@ -41,32 +40,6 @@ function test( done ) {
         var error = assert.fail();
         return done(error);
     });
-}
-
-
-////////////////////
-///// PARTIALS /////
-////////////////////
-
-function _getTestUser() {
-    var deferred = Q.defer();
-
-    var models = require('../../../models/models.js');
-
-    models.User.findOne({ username: 'test@example.com' }, function( error, user ) {
-        if( error ) {
-            deferred.reject( error );
-        }
-        else if( user ) {
-            deferred.resolve(user);
-        }
-        else {
-            var errorObj = { statusCode: 500, message: 'No user, and no errors' };
-            deferred.reject(errorObj);
-        }
-    });
-
-    return deferred.promise;
 }
 
 
