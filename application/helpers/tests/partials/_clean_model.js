@@ -6,7 +6,7 @@ var helpers = require('helpers/helpers.js');
 function test( done ) {
     this.timeout(30000); // 30 seconds
 
-    var getDatabaseConnection = helpers.connectDatabase();
+    var getDatabaseConnection = helpers.connectDatabase('test');
 
     getDatabaseConnection.then(function() {
         var getTestUser = helpers.getTestUser();

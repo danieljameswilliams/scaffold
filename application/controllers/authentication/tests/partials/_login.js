@@ -15,7 +15,7 @@ function test( done ) {
     request.body.username = 'test@example.com';
     request.body.password = '12345678';
 
-    var getDatabaseConnection = helpers.connectDatabase();
+    var getDatabaseConnection = helpers.connectDatabase('test');
 
     getDatabaseConnection.then(function() {
         var getTestUser = helpers.getTestUser();
