@@ -1,6 +1,16 @@
 {
   "environment": "development",
   "env": "dev",
+  "facebook": {
+    "user": {
+      "accessToken": "CAAF6Hr4ygSMBAAsYd0BoXsqWwyblIZBq3mwxxs0ZAVi00eEq9eY6XzqJVlnPZCWCS5ylZAAifpyqmxTZAx9vPQhoHtHnAuAsoQNa8GZChXHqToo4FyKh47fVjmmRwUdwRWOyFSS53ErEwPjIMkl2OcYy7rgP4UppqLNmCJl6nWZCiTbNHNMrmzlB65MWzfnrwcnLUljSFkuFQZDZD",
+      "id": "104979846544711",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john_uumalxx_doe@tfbnw.net",
+      "password": "jCBZjWnd9mG3zdpk"
+    }
+  },
   "api": {
     "database": "mongodb://localhost:27017/local",
     "protocol": "http",

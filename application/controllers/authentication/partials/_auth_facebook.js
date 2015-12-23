@@ -1,7 +1,7 @@
-var https = require('https');
 var Q = require("q");
 
 var User = require('models/user.js');
+var helpers = require('helpers/helpers.js');
 var login = require('../helpers/_login.js').login;
 var createNewUser = require('../helpers/_createNewUser.js');
 
@@ -13,35 +13,38 @@ var createNewUser = require('../helpers/_createNewUser.js');
  * @return {HttpResponse}
  */
 function authenticate( request, response ) {
-  response.setHeader( 'Access-Control-Allow-Origin', '*' );
-  response.setHeader( 'Access-Control-Allow-Credentials', true );
+    response.setHeader( 'Access-Control-Allow-Origin', '*' );
+    response.setHeader( 'Access-Control-Allow-Credentials', true );
 
-  var accessToken = request.body.accessToken;
-  var userId = request.body.userId;
+    var accessToken = request.body.accessToken;
+    var userId = request.body.userId;
 
-  if( accessToken && userId ) {
-    var getUser = getOrCreateUser( accessToken, userId );
+    if( accessToken && userId ) {
+        var getUser = getOrCreateUser( accessToken, userId );
 
-    getUser.then(function( user ) {
-      var getHttpResponse = login( request, response, user, 'customer' );
+        getUser.then(function( user ) {
+            var getHttpResponse = login( request, response, user, 'customer' );
 
-      getHttpResponse.then(function( context ) {
-        return response.json(context);
-      });
-    });
+            getHttpResponse.then(function( context ) {
+                return response.json(context);
+            });
+        });
 
-    getUser.fail(function( errorObj ) {
-      if( errorObj.statusCode == 403 ) {
-        return response.sendStatus(403);
-      }
-      else if( errorObj.statusCode == 500 ) {
-        return response.sendStatus(500);
-      }
-    });
-  }
-  else {
-    return response.sendStatus(400);
-  }
+        getUser.fail(function( errorObj ) {
+            if( errorObj.statusCode == 403 ) {
+                return response.sendStatus(403);
+            }
+            else if( errorObj.statusCode == 400 ) {
+                return response.sendStatus(400);
+            }
+            else {
+                return response.sendStatus(500);
+            }
+        });
+    }
+    else {
+        return response.sendStatus(400);
+    }
 }
 
 
@@ -55,35 +58,35 @@ function authenticate( request, response ) {
  * .. We then match the facebook-userId with our database, and return a user.
  */
 function getOrCreateUser( accessToken, userId ) {
-  var deferred = Q.defer();
+    var deferred = Q.defer();
 
-  if( accessToken && userId ) {
-    var getFacebookUser = validateFacebookToken(accessToken, userId);
+    if( accessToken && userId ) {
+        var getFacebookData = validateFacebookToken(accessToken, userId);
 
-    getFacebookUser.then(function( facebookObj ) {
-      var getManualUser = _getOrCreateManualUser( facebookObj );
+        getFacebookData.then(function( facebookObj ) {
+            var getManualUser = _getOrCreateManualUser( facebookObj );
 
-      getManualUser.then(function( manualObj ) {
-        deferred.resolve( manualObj );
-        return manualObj;
-      });
+            getManualUser.then(function( manualObj ) {
+                deferred.resolve( manualObj );
+                return manualObj;
+            });
 
-      getManualUser.fail(function( errorObj ) {
-        deferred.reject( errorObj );
-        return errorObj;
-      });
-    });
+            getManualUser.fail(function( errorObj ) {
+                deferred.reject( errorObj );
+                return errorObj;
+            });
+        });
 
-    getFacebookUser.fail(function( errorObj ) {
-      deferred.reject( errorObj );
-      return errorObj;
-    });
-  }
-  else {
-    deferred.reject({ 'statusCode': 400, 'message': 'Missing "AccessToken" or "UserId"' });
-  }
+        getFacebookData.fail(function( errorObj ) {
+            deferred.reject( errorObj );
+            return errorObj;
+        });
+    }
+    else {
+        deferred.reject({ 'statusCode': 400, 'message': 'Missing "AccessToken" or "UserId"' });
+    }
 
-  return deferred.promise;
+    return deferred.promise;
 }
 
 
@@ -91,32 +94,36 @@ function getOrCreateUser( accessToken, userId ) {
  * Validates a Facebook "AccessToken" server-side to ensure security and authentity of user.
  */
 function validateFacebookToken( accessToken, userId ) {
-  var deferred = Q.defer();
-  var fields = 'id,first_name,last_name,email';
-  var url = 'https://graph.facebook.com/me?fields=' + fields + '&access_token=' + accessToken;
+    var deferred = Q.defer();
+    var fields = 'id,first_name,last_name,email';
+    var url = 'https://graph.facebook.com/me?fields=' + fields + '&access_token=' + accessToken;
 
-  https.get(url, function( httpsResponse ) {
-    httpsResponse.on('data', function ( chunk ) {
-      var facebookObj = JSON.parse(chunk);
-
-      if( facebookObj.error && facebookObj.error.code == 190 ) {
-        var errorObj = { 'statusCode': 403, 'message': 'Not a valid "AccessToken"' };
-        deferred.reject(errorObj);
-      }
-      else if( facebookObj.id == userId ) {
-        deferred.resolve(facebookObj);
-      }
-      else {
-        var errorObj = { 'statusCode': 500, 'message': facebookObj.error.message };
-        deferred.reject(errorObj);
-      }
+    var requestResponse = helpers.httpRequest({
+        url: url,
+        method: 'GET',
+        json: false
     });
-  }).on('error', function( error ) {
-    var errorObj = { 'statusCode': 500, 'message': error.message };
-    deferred.reject(errorObj);
-  });
 
-  return deferred.promise;
+    requestResponse.then(function( facebookObj ) {
+        facebookObj = JSON.parse(facebookObj);
+        if( facebookObj.error && facebookObj.error.code == 190 ) {
+            var errorObj = { 'statusCode': 403, 'message': 'Not a valid "AccessToken"' };
+            deferred.reject(errorObj);
+        }
+        else if( facebookObj.id == userId ) {
+            deferred.resolve(facebookObj);
+        }
+        else {
+            var errorObj = { 'statusCode': 500, 'message': facebookObj.error.message };
+            deferred.reject(errorObj);
+        }
+    });
+
+    requestResponse.fail(function( errorObj ) {
+        deferred.reject(errorObj);
+    });
+
+    return deferred.promise;
 }
 
 
@@ -124,35 +131,35 @@ function validateFacebookToken( accessToken, userId ) {
  * Validates if the facebook-userID matches a user in our database.
  */
 function _getOrCreateManualUser( facebookObj ) {
-  var deferred = Q.defer();
+    var deferred = Q.defer();
 
-  User.findOne({ 'facebookId': facebookObj.id }, { password: 0 }, function( error, user ) {
-    if( error ) {
-      var errorObj = { 'statusCode': 500, 'message': error.message };
-      deferred.reject(errorObj);
-    }
-    else if( user ) {
-      deferred.resolve( user );
-    }
-    else {
-      if( facebookObj.email ) {
-        var getDuplicateUsers = _checkIfUserExistByEmail( facebookObj );
+    User.findOne({ 'facebookId': facebookObj.id }, { password: 0 }, function( error, user ) {
+        if( error ) {
+            var errorObj = { 'statusCode': 500, 'message': error.message };
+            deferred.reject(errorObj);
+        }
+        else if( user ) {
+            deferred.resolve( user );
+        }
+        else {
+            if( facebookObj.email ) {
+                var getDuplicateUsers = _checkIfUserExistByEmail( facebookObj );
 
-        getDuplicateUsers.then(function( manualObj ) {
-          deferred.resolve( manualObj );
-        });
+                getDuplicateUsers.then(function( manualObj ) {
+                    deferred.resolve( manualObj );
+                });
 
-        getDuplicateUsers.fail(function( errorObj ) {
-          deferred.reject( errorObj );
-        });
-      }
-      else {
-        deferred.reject({ 'statusCode': 400, 'message': 'Missing "Email" from Facebook' });
-      }
-    }
-  });
+                getDuplicateUsers.fail(function( errorObj ) {
+                    deferred.reject( errorObj );
+                });
+            }
+            else {
+                deferred.reject({ 'statusCode': 400, 'message': 'Missing "Email" from Facebook' });
+            }
+        }
+    });
 
-  return deferred.promise;
+    return deferred.promise;
 }
 
 
@@ -161,39 +168,39 @@ function _getOrCreateManualUser( facebookObj ) {
  * If there is a user, we return that user, if not we raise an error.
  */
 function _checkIfUserExistByEmail( facebookObj ) {
-  var deferred = Q.defer();
+    var deferred = Q.defer();
 
-  User.findOne({ 'email': facebookObj.email }, { password: 0 }, function( error, user ) {
-    if( error ) {
-      var errorObj = { 'statusCode': 500, 'message': error.message };
-      deferred.reject(errorObj);
-    }
-    else if( user ) {
-      var errorObj = { 'statusCode': 409, 'message': 'The email is already in use' };
-      deferred.reject(errorObj);
-    }
-    else {
-      var userObj = {
-        firstName: facebookObj.first_name,
-        lastName: facebookObj.last_name,
-        username: facebookObj.email,
-        email: facebookObj.email,
-        facebookId: facebookObj.id,
-        isStaff: false
-      };
-      var getNewUser = createNewUser( userObj );
+    User.findOne({ 'email': facebookObj.email }, { password: 0 }, function( error, user ) {
+        if( error ) {
+            var errorObj = { 'statusCode': 500, 'message': error.message };
+            deferred.reject(errorObj);
+        }
+        else if( user ) {
+            var errorObj = { 'statusCode': 409, 'message': 'The email is already in use' };
+            deferred.reject(errorObj);
+        }
+        else {
+            var userObj = {
+                firstName: facebookObj.first_name,
+                lastName: facebookObj.last_name,
+                username: facebookObj.email,
+                email: facebookObj.email,
+                facebookId: facebookObj.id,
+                isStaff: false
+            };
+            var getNewUser = createNewUser( userObj );
 
-      getNewUser.then(function( user ) {
-        deferred.resolve(user);
-      });
+            getNewUser.then(function( user ) {
+                deferred.resolve(user);
+            });
 
-      getNewUser.fail(function( errorObj ) {
-        deferred.reject(errorObj);
-      });
-    }
-  });
+            getNewUser.fail(function( errorObj ) {
+                deferred.reject(errorObj);
+            });
+        }
+    });
 
-  return deferred.promise;
+    return deferred.promise;
 }
 
 
@@ -202,7 +209,7 @@ function _checkIfUserExistByEmail( facebookObj ) {
 //////////////////////
 
 module.exports = {
-  authenticate: authenticate,
-  getOrCreateUser: getOrCreateUser,
-  validateFacebookToken: validateFacebookToken
+    authenticate: authenticate,
+    getOrCreateUser: getOrCreateUser,
+    validateFacebookToken: validateFacebookToken
 };

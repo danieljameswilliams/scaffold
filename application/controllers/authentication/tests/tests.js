@@ -8,4 +8,9 @@ describe('Authentication', function () {
     describe('Create New User Helper', function () {
         it('should return a new user that can then be cleaned like other models and deleted again', require('./partials/_createNewUser.js'));
     });
+
+    // Controllers - Authentication - Helpers - Create New User
+    describe('Add Facebook', function () {
+        it('should return a new user that can then be cleaned like other models and deleted again', require('./partials/_add_facebook.js'));
+    });
 });

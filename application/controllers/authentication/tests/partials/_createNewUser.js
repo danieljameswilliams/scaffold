@@ -36,7 +36,7 @@ function test( done ) {
                         assert.deepEqual(result, {
                             firstName: 'John',
                             lastName: 'Doe',
-                            username: 'test' + context.token + '@example.com'
+                            username: 'test.createNewUser.' + context.token + '@example.com'
                         });
 
                         return done();
@@ -79,7 +79,7 @@ function _generateUniqueUsername() {
     try {
         crypto.randomBytes(10, function(ex, buf) {
             var token = buf.toString('hex');
-            var username = 'test' + token + '@example.com';
+            var username = 'test.createNewUser.' + token + '@example.com';
             deferred.resolve({ username: username, token: token });
         }, function() {
             var errorObj = { 'statusCode': 500, 'message': 'Crypto failed' };

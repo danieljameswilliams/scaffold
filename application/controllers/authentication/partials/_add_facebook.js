@@ -19,7 +19,7 @@ function add( request, response ) {
         var getFacebookData = authFacebook.validateFacebookToken(accessToken, userId);
 
         getFacebookData.then(function( facebookObj ) {
-            var saveToUser = _addFacebookIdToManualUser( response, username, facebookObj );
+            var saveToUser = _addFacebookIdToManualUser( username, facebookObj );
 
             saveToUser.then(function( manualObj ) {
                 return response.sendStatus(200);
@@ -39,7 +39,10 @@ function add( request, response ) {
             if( errorObj.statusCode == 403 ) {
                 return response.sendStatus(403);
             }
-            else if( errorObj.statusCode == 500 ) {
+            else if( errorObj.statusCode == 400 ) {
+                return response.sendStatus(400);
+            }
+            else {
                 return response.sendStatus(500);
             }
         });
@@ -54,7 +57,7 @@ function add( request, response ) {
 ///// PARTIALS /////
 ////////////////////
 
-function _addFacebookIdToManualUser( response, username, fbMeObj ) {
+function _addFacebookIdToManualUser( username, fbMeObj ) {
     var deferred = Q.defer();
     var userId = fbMeObj.id;
 
