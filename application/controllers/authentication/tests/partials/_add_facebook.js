@@ -35,30 +35,38 @@ function test( done ) {
                         // TODO: Get a auto renewed token with graph.facebook.com/oauth/access_token
                         // https://developers.facebook.com/docs/graph-api/reference/v2.5/app/accounts/test-users
 
-                        var accessToken = nconf.get('facebook:user:accessToken');
-                        var userId = nconf.get('facebook:user:id');
+                        var getAccessToken = helpers.getFacebookTestUserAccessToken();
 
-                        var request = httpMocks.createRequest();
-                        var response = httpMocks.createResponse({
-                            eventEmitter: require('events').EventEmitter
+                        getAccessToken.then(function( accessToken ) {
+                            var userId = nconf.get('facebook:user:id');
+
+                            var request = httpMocks.createRequest();
+                            var response = httpMocks.createResponse({
+                                eventEmitter: require('events').EventEmitter
+                            });
+
+                            response.on('end', function() {
+                                if( this.statusCode == 200 ) {
+                                    done();
+                                }
+                                else {
+                                    var error = new Error('Something went wrong (' + this.statusCode + ')');
+                                    done(error);
+                                }
+                            });
+
+                            request.body.accessToken = accessToken;
+                            request.body.userId = userId;
+                            request.body.username = user.username;
+
+                            var addFacebook = require('../../partials/_add_facebook.js').add;
+                            addFacebook( request, response );
                         });
 
-                        response.on('end', function() {
-                            if( this.statusCode == 200 ) {
-                                done();
-                            }
-                            else {
-                                var error = new Error('Something went wrong');
-                                done(error);
-                            }
+                        getAccessToken.fail(function( errorObj ) {
+                            var error = new Error('Token fetch failed');
+                            return done(error);
                         });
-
-                        request.body.accessToken = accessToken;
-                        request.body.userId = userId;
-                        request.body.username = user.username;
-
-                        var addFacebook = require('../../partials/_add_facebook.js').add;
-                        addFacebook( request, response );
                     });
 
                     getNewUser.fail(function( errorObj ) {

@@ -2,8 +2,11 @@
   "environment": "development",
   "env": "dev",
   "facebook": {
+    "app": {
+      "id": "415747435299107",
+      "secret": "d5b5d77d31536b1c9b431e98e87712f1"
+    },
     "user": {
-      "accessToken": "CAAF6Hr4ygSMBAAsYd0BoXsqWwyblIZBq3mwxxs0ZAVi00eEq9eY6XzqJVlnPZCWCS5ylZAAifpyqmxTZAx9vPQhoHtHnAuAsoQNa8GZChXHqToo4FyKh47fVjmmRwUdwRWOyFSS53ErEwPjIMkl2OcYy7rgP4UppqLNmCJl6nWZCiTbNHNMrmzlB65MWzfnrwcnLUljSFkuFQZDZD",
       "id": "104979846544711",
       "firstName": "John",
       "lastName": "Doe",
