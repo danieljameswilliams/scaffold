@@ -14,7 +14,7 @@ function test( done ) {
 
     response.on('end', function() {
         if( this.statusCode == 200 ) {
-            // TODO: Check if test@example.com is the retrieved user.
+            // TODO: Check if test.staff@example.com is the retrieved user.
             done();
         }
         else {
@@ -24,14 +24,14 @@ function test( done ) {
     });
 
     request.body.fields = 'userId, username, firstName, lastName';
-    request.body.username = 'test@example.com';
+    request.body.username = 'test.staff@example.com';
     request.body.password = '12345678';
 
     var getDatabaseConnection = helpers.connectDatabase('test');
 
     getDatabaseConnection.then(function() {
-        var authManual = require('controllers/authentication/partials/_auth_manual.js').authenticate;
-        authManual(request, response);
+        var authStaff = require('controllers/authentication/partials/_auth_staff.js').authenticate;
+        authStaff(request, response);
     });
 
     getDatabaseConnection.fail(function( errorObj ) {

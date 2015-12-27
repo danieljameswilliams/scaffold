@@ -19,6 +19,11 @@ describe('Authentication', function () {
         it('should return a unique token and a cleaned user object', require('./partials/_auth_manual.js'));
     });
 
+    // Controllers - Authentication - Authenticate manual staff user
+    describe('Authenticate Manual Staff', function () {
+        it('should return a unique token and a cleaned user object', require('./partials/_auth_staff.js'));
+    });
+
     // Controllers - Authentication - Authenticate using Facebook login
     describe('Authenticate Facebook', function () {
         it('should return a unique token and a cleaned user object', require('./partials/_auth_facebook.js'));
