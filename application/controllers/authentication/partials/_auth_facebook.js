@@ -13,9 +13,6 @@ var createNewUser = require('../helpers/_createNewUser.js');
  * @return {HttpResponse}
  */
 function authenticate( request, response ) {
-    response.setHeader( 'Access-Control-Allow-Origin', '*' );
-    response.setHeader( 'Access-Control-Allow-Credentials', true );
-
     var accessToken = request.body.accessToken;
     var userId = request.body.userId;
 

@@ -6,7 +6,7 @@ var helpers = require('helpers/helpers.js');
 
 
 function isAuth( callback ) {
-    return function ( request, response ) {
+    return function ( request, response, next ) {
         var apiKey = request.body['apiKey'] || request.query['apiKey'];
 
         // TODO: Make an API key for each platform.
@@ -19,7 +19,7 @@ function isAuth( callback ) {
             Application Production: 48b74cba-603d-4f79-9619-494706c86aa8
         */
         if( apiKey && apiKey == nconf.get('api:key') ) {
-            return callback( request, response );
+            return callback( request, response, next );
         }
         else {
             return response.sendStatus(401);

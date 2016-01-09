@@ -8,56 +8,53 @@ var createNewUser = require('../helpers/_createNewUser.js');
 
 
 function create( request, response ) {
-  response.setHeader( 'Access-Control-Allow-Origin', '*' );
+    var username = request.body.username;
+    var password = request.body.password;
+    var firstName = request.body.firstName;
+    var lastName = request.body.lastName;
 
-  var username = request.body.username;
-  var password = request.body.password;
-  var firstName = request.body.firstName;
-  var lastName = request.body.lastName;
+    var getUser = authManual.getUser( username );
 
-  var getUser = authManual.getUser( username );
+    getUser.then(function( user ) {
+        return response.sendStatus(409);
+    });
 
-  getUser.then(function( user ) {
-    return response.sendStatus(409);
-  });
+    getUser.fail(function( errorObj ) {
+        if( errorObj.statusCode == 204 ) {
+            var userObj = {
+                firstName: firstName,
+                lastName: lastName,
+                username: username,
+                email: username,
+                password: passwordHash.generate(password),
+                isStaff: false
+            };
 
-  getUser.fail(function( errorObj ) {
-    if( errorObj.statusCode == 204 ) {
+            var getNewUser = createNewUser( userObj );
 
-      var userObj = {
-        firstName: firstName,
-        lastName: lastName,
-        username: username,
-        email: username,
-        password: passwordHash.generate(password),
-        isStaff: false
-      };
+            getNewUser.then(function( user ) {
+                var getHttpResponse = login( request, response, user, 'customer' );
 
-      var getNewUser = createNewUser( userObj );
+                getHttpResponse.then(function( context ) {
+                    return response.json(context);
+                });
 
-      getNewUser.then(function( user ) {
-        var getHttpResponse = login( request, response, user, 'customer' );
+                getHttpResponse.fail(function() {
+                    return response.sendStatus(500);
+                });
+            });
 
-        getHttpResponse.then(function( context ) {
-          return response.json(context);
-        });
-
-        getHttpResponse.fail(function() {
-          return response.sendStatus(500);
-        });
-      });
-
-      getNewUser.fail(function( errorObj ) {
-        return response.sendStatus(500);
-      });
-    }
-    else if( errorObj.statusCode == 403 ) {
-      return response.sendStatus(403);
-    }
-    else if( errorObj.statusCode == 500 ) {
-      return response.sendStatus(500);
-    }
-  });
+            getNewUser.fail(function( errorObj ) {
+                return response.sendStatus(500);
+            });
+        }
+        else if( errorObj.statusCode == 403 ) {
+            return response.sendStatus(403);
+        }
+        else if( errorObj.statusCode == 500 ) {
+            return response.sendStatus(500);
+        }
+    });
 }
 
 
@@ -66,5 +63,5 @@ function create( request, response ) {
 //////////////////////
 
 module.exports = {
-  create: create
+    create: create
 };

@@ -6,8 +6,6 @@ var updateAuthActivity = require('../helpers/_login.js').updateAuthActivity;
 
 
 function validate( request, response ) {
-    response.setHeader( 'Access-Control-Allow-Origin', '*' );
-
     var fields = request.query['fields'];
     var token = request.query['token'];
     var permission = request.query['permission'];

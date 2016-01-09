@@ -9,8 +9,6 @@ var authFacebook = require('./_auth_facebook.js');
  * @return {HttpResponse}
  */
 function add( request, response ) {
-    response.setHeader( 'Access-Control-Allow-Origin', '*' );
-
     var accessToken = request.body.accessToken;
     var userId = request.body.userId;
     var username = request.body.username;

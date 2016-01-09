@@ -7,8 +7,6 @@ var login = require('../helpers/_login.js').login;
 
 
 function create( request, response ) {
-    response.setHeader( 'Access-Control-Allow-Origin', '*' );
-
     var username = request.body.username;
     var password = request.body.password;
     var firstName = request.body.firstName;
