@@ -1,13 +1,14 @@
 var passwordHash = require('password-hash');
-var Q = require("q");
 
 var User = require('models/user.js');
 var authManual = require('./_auth_manual.js');
 var login = require('../helpers/_login.js').login;
 var createNewUser = require('../helpers/_createNewUser.js');
+var utilities = require('utilities/utilities.js');
 
 
-function create( request, response ) {
+function create( request, response, next ) {
+    var anonymousId = request.body.anonymousId;
     var username = request.body.username;
     var password = request.body.password;
     var firstName = request.body.firstName;
@@ -16,10 +17,28 @@ function create( request, response ) {
     var getUser = authManual.getUser( username );
 
     getUser.then(function( user ) {
-        return response.sendStatus(409);
+        try {
+            var error = new Error('User already exist with this username');
+
+            utilities.logger.info(error.message, {
+                module: 'Authentication',
+                method: 'Create Manual User',
+                type: 'User Error',
+                anonymousId: anonymousId,
+                username: username
+            });
+
+            // HTTP Status 409 is "Conflict"
+            response.statusCode = 409;
+            return response.json(error.message);
+        }
+        catch( error ) {
+            return next(error);
+        }
     });
 
     getUser.fail(function( errorObj ) {
+        // HTTP Status 204 is "No Content"
         if( errorObj.statusCode == 204 ) {
             var userObj = {
                 firstName: firstName,
@@ -39,20 +58,24 @@ function create( request, response ) {
                     return response.json(context);
                 });
 
-                getHttpResponse.fail(function() {
-                    return response.sendStatus(500);
+                getHttpResponse.fail(function( errorObj ) {
+                    response.statusCode = errorObj.statusCode;
+                    return response.json(errorObj.message);
                 });
             });
 
             getNewUser.fail(function( errorObj ) {
-                return response.sendStatus(500);
+                response.statusCode = 409;
+                return response.json(errorObj.message);
             });
         }
         else if( errorObj.statusCode == 403 ) {
-            return response.sendStatus(403);
+            response.statusCode = 403;
+            return response.json(errorObj.message);
         }
         else if( errorObj.statusCode == 500 ) {
-            return response.sendStatus(500);
+            response.statusCode = 500;
+            return response.json(errorObj.message);
         }
     });
 }

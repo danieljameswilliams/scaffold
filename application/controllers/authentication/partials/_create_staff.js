@@ -1,5 +1,4 @@
 var passwordHash = require('password-hash');
-var Q = require("q");
 
 var authManual = require('./_auth_manual.js');
 var createNewUser = require('../helpers/_createNewUser.js');

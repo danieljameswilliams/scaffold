@@ -1,6 +1,7 @@
 var Q = require("q");
 
 var User = require('models/user.js');
+var utilities = require('utilities/utilities.js');
 
 
 function createNewUser( userObj ) {
@@ -12,6 +13,12 @@ function createNewUser( userObj ) {
         if( error ) {
             var errorObj = { 'statusCode': 500, 'message': error.message };
             deferred.reject(errorObj);
+
+            utilities.logger.error(error.message, {
+                module: 'Authentication',
+                method: 'Create New User Helper Saving',
+                type: 'System Error'
+            });
         }
         else if( user ) {
             deferred.resolve(user);
@@ -19,6 +26,12 @@ function createNewUser( userObj ) {
         else {
             var errorObj = { 'statusCode': 500, 'message': 'Saved user, but got no user in return.' };
             deferred.reject(errorObj);
+
+            utilities.logger.error('No errors, but no user either.', {
+                module: 'Authentication',
+                method: 'Create New User Helper',
+                type: 'System Error'
+            });
         }
     });
 

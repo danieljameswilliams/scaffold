@@ -26,7 +26,7 @@ function _onRequestCompleted( error, response, body, deferred ) {
         deferred.resolve(body);
     }
     else {
-        var errorObj = { 'statusCode': response.statusCode, 'message': response.statusMessage };
+        var errorObj = { 'statusCode': response.statusCode, 'statusMessage': response.statusMessage, 'message': body };
         deferred.reject(errorObj);
     }
 }

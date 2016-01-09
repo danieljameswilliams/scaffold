@@ -4,7 +4,7 @@ var nconf = require('nconf');
 var helpers = require('helpers/helpers.js');
 
 
-function create( request, response ) {
+function create( request, response, next ) {
     var fields = 'userId, username, email, firstName, lastName';
     var url = util.format('%s://%s/create/manual', nconf.get('api:protocol'), nconf.get('api:host'));
 
@@ -41,9 +41,14 @@ function create( request, response ) {
     });
 
     requestResponse.fail(function( errorObj ) {
-        // TODO: Make User Creation ASYNC in client.
-        console.log('[%s] - %s', errorObj.statusCode, errorObj.message);
-        return response.redirect('/bruger/opret?error=' + errorObj.message);
+        try {
+            // TODO: Make User Creation ASYNC in client.
+            console.log('[%s - %s]: %s', errorObj.statusCode, errorObj.statusMessage, errorObj.message);
+            return response.redirect('/bruger/opret?error=' + errorObj.statusMessage);
+        }
+        catch( error ) {
+            return next(error);
+        }
     });
 }
 
