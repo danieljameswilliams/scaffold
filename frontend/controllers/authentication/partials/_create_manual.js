@@ -9,6 +9,7 @@ function create( request, response ) {
     var url = util.format('%s://%s/create/manual', nconf.get('api:protocol'), nconf.get('api:host'));
 
     var postData = {
+        apiKey: nconf.get('api:key'),
         fields: fields,
         firstName: request.body['firstName'],
         lastName: request.body['lastName'],
@@ -40,10 +41,9 @@ function create( request, response ) {
     });
 
     requestResponse.fail(function( errorObj ) {
-        var errorMessage = errorObj.message;
-
         // TODO: Make User Creation ASYNC in client.
-        return response.redirect('/bruger/opret?error=' + errorMessage);
+        console.log('[%s] - %s', errorObj.statusCode, errorObj.message);
+        return response.redirect('/bruger/opret?error=' + errorObj.message);
     });
 }
 

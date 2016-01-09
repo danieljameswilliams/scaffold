@@ -2,6 +2,7 @@
   "environment": "production",
   "env": "prod",
   "api": {
+    "key": "573f4cb5-4a8d-4569-a082-4f56a080a731",
     "protocol": "https",
     "host": "api.scaffold.com"
   },

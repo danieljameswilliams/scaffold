@@ -15,17 +15,17 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-var getDatabaseConnection = helpers.connectDatabase();
+var getDatabaseConnection = helpers.connectDatabase(process.env['NODE_ENV']);
 
 getDatabaseConnection.then(function() {
     var controllers = require('./controllers/controllers.js');
     var decorators = require('./decorators/decorators.js');
     var routes = require('./routes/routes.js')( app, controllers, decorators );
+
+    app.listen( nconf.get('http:port') );
+    console.log('Listening on port (%s)', nconf.get('http:port'));
 });
 
 getDatabaseConnection.fail(function( error ) {
     console.log('Database: %s', error.message);
 });
-
-app.listen( nconf.get('http:port') );
-console.log('Listening on port (%s)', nconf.get('http:port'));

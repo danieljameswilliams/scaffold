@@ -9,6 +9,7 @@ function create( request, response ) {
     var url = util.format('%s://%s/authenticate/facebook', nconf.get('api:protocol'), nconf.get('api:host'));
 
     var postData = {
+        apiKey: nconf.get('api:key'),
         fields: fields,
         accessToken: request.body['accessToken'],
         userId: request.body['userId']

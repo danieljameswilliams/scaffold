@@ -7,61 +7,24 @@ var helpers = require('helpers/helpers.js');
 
 function isAuth( callback ) {
     return function ( request, response ) {
-        var token = request.cookies['usertoken'];
+        var apiKey = request.body['apiKey'] || request.query['apiKey'];
 
-        if( token ) {
-            var validateAuthToken = _validateAuthToken( token );
-
-            validateAuthToken.then(function( user ) {
-                request.isLoggedIn = true;
-                request.user = user;
-                return callback( request, response );
-            });
-
-            validateAuthToken.fail(function( errorObj ) {
-                request.isLoggedIn = false;
-                request.user = null;
-                return callback( request, response );
-            });
-        }
-        else {
-            request.isLoggedIn = false;
-            request.user = null;
+        // TODO: Make an API key for each platform.
+        /*
+            Frontend Development: 09651661-6e79-4930-a9b3-075659c4636f
+            Frontend Production: 573f4cb5-4a8d-4569-a082-4f56a080a731
+            Backend Development: 288b65eb-15ec-4299-87c2-46166eae5bd8
+            Backend Production: d216cf0a-9756-442e-993d-f789f9d1fc94
+            Application Development: 6beafb5e-c275-422a-b10d-e9152622111c
+            Application Production: 48b74cba-603d-4f79-9619-494706c86aa8
+        */
+        if( apiKey && apiKey == nconf.get('api:key') ) {
             return callback( request, response );
         }
+        else {
+            return response.sendStatus(401);
+        }
     };
-}
-
-
-////////////////////
-///// PARTIALS /////
-////////////////////
-
-function _validateAuthToken( token ) {
-    var deferred = Q.defer();
-
-    var fields = 'userId, username, email, firstName, lastName';
-    var url = util.format('%s://%s/authenticate', nconf.get('api:protocol'), nconf.get('api:host'));
-    var parameters = {
-        fields: fields,
-        token: token
-    };
-
-    var requestResponse = helpers.httpRequest({
-        url: helpers.addUrlParameters(url, parameters),
-        method: 'GET',
-        json: true
-    });
-
-    requestResponse.then(function( user ) {
-        deferred.resolve(user);
-    });
-
-    requestResponse.fail(function( errorObj ) {
-        deferred.reject(errorObj);
-    });
-
-    return deferred.promise;
 }
 
 

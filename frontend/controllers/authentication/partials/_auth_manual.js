@@ -9,9 +9,10 @@ function create( request, response ) {
     var url = util.format('%s://%s/authenticate/manual', nconf.get('api:protocol'), nconf.get('api:host'));
 
     var postData = {
+        apiKey: nconf.get('api:key'),
         fields: fields,
         username: request.body['username'],
-        password: request.body['password'],
+        password: request.body['password']
     };
 
     var requestResponse = helpers.httpRequest({

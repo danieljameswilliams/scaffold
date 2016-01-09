@@ -15,6 +15,7 @@
     }
   },
   "api": {
+    "key": "c9856306-1cc0-40ec-bf7a-70203118eb9a",
     "database": "mongodb://localhost:27017/local",
     "protocol": "http",
     "host": "localhost:9000"

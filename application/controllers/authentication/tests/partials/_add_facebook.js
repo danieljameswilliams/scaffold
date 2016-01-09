@@ -55,6 +55,7 @@ function test( done ) {
                                 }
                             });
 
+                            request.body.authToken = '';
                             request.body.accessToken = accessToken;
                             request.body.userId = userId;
                             request.body.username = user.username;

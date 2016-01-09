@@ -20,6 +20,7 @@ function isAuth( callback ) {
             });
 
             validateAuthToken.fail(function( errorObj ) {
+                console.log(errorObj);
                 request.isLoggedIn = false;
                 request.user = null;
                 return callback( request, response );
@@ -44,6 +45,7 @@ function _validateAuthToken( token, addToActivityLog ) {
     var fields = 'userId, username, email, firstName, lastName, facebookId';
     var url = util.format('%s://%s/authenticate', nconf.get('api:protocol'), nconf.get('api:host'));
     var parameters = {
+        apiKey: nconf.get('api:key'),
         fields: fields,
         permission: 'customer',
         token: token,

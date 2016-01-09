@@ -8,9 +8,11 @@ function create( request, response ) {
     var url = util.format('%s://%s/account/facebook', nconf.get('api:protocol'), nconf.get('api:host'));
 
     var postData = {
+        apiKey: nconf.get('api:key'),
         accessToken: request.body['accessToken'],
         userId: request.body['userId'],
-        username: request.body['username']
+        username: request.body['username'],
+        userToken: request.cookies['usertoken']
     };
 
     var requestResponse = helpers.httpRequest({
@@ -30,6 +32,9 @@ function create( request, response ) {
         }
         else if( errorObj.statusCode == 400 ) {
             return response.sendStatus(400);
+        }
+        else if( errorObj.statusCode == 401 ) {
+            return response.sendStatus(500);
         }
         else {
             return response.sendStatus(500);

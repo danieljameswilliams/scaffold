@@ -2,6 +2,7 @@
   "environment": "development",
   "env": "dev",
   "api": {
+    "key": "6beafb5e-c275-422a-b10d-e9152622111c",
     "protocol": "http",
     "host": "localhost:9000"
   },

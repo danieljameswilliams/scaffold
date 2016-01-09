@@ -14,42 +14,51 @@ function add( request, response ) {
     var accessToken = request.body.accessToken;
     var userId = request.body.userId;
     var username = request.body.username;
+    var userToken = request.body.userToken;
 
-    if( accessToken && userId && username ) {
-        var getFacebookData = authFacebook.validateFacebookToken(accessToken, userId);
+    var validateAuthToken = _validateAuthToken(userToken);
 
-        getFacebookData.then(function( facebookObj ) {
-            var saveToUser = _addFacebookIdToManualUser( username, facebookObj );
+    validateAuthToken.then(function() {
+        if( accessToken && userId && username ) {
+            var getFacebookData = authFacebook.validateFacebookToken(accessToken, userId);
 
-            saveToUser.then(function( manualObj ) {
-                return response.sendStatus(200);
+            getFacebookData.then(function( facebookObj ) {
+                var saveToUser = _addFacebookIdToManualUser( username, facebookObj );
+
+                saveToUser.then(function( manualObj ) {
+                    return response.sendStatus(200);
+                });
+
+                saveToUser.fail(function( errorObj ) {
+                    if( errorObj.statusCode == 403 ) {
+                        return response.sendStatus(403);
+                    }
+                    else if( errorObj.statusCode == 500 ) {
+                        return response.sendStatus(500);
+                    }
+                });
             });
 
-            saveToUser.fail(function( errorObj ) {
+            getFacebookData.fail(function( errorObj ) {
                 if( errorObj.statusCode == 403 ) {
                     return response.sendStatus(403);
                 }
-                else if( errorObj.statusCode == 500 ) {
+                else if( errorObj.statusCode == 400 ) {
+                    return response.sendStatus(400);
+                }
+                else {
                     return response.sendStatus(500);
                 }
             });
-        });
+        }
+        else {
+            return response.sendStatus(400);
+        }
+    });
 
-        getFacebookData.fail(function( errorObj ) {
-            if( errorObj.statusCode == 403 ) {
-                return response.sendStatus(403);
-            }
-            else if( errorObj.statusCode == 400 ) {
-                return response.sendStatus(400);
-            }
-            else {
-                return response.sendStatus(500);
-            }
-        });
-    }
-    else {
-        return response.sendStatus(400);
-    }
+    validateAuthToken.fail(function() {
+        return response.sendStatus(403);
+    });
 }
 
 
@@ -79,6 +88,34 @@ function _addFacebookIdToManualUser( username, fbMeObj ) {
                 deferred.resolve(user);
             });
         }
+    });
+
+    return deferred.promise;
+}
+
+
+function _validateAuthToken( token ) {
+    var deferred = Q.defer();
+
+    var fields = 'userId, username, email, firstName, lastName';
+    var url = util.format('%s://%s/authenticate', nconf.get('api:protocol'), nconf.get('api:host'));
+    var parameters = {
+        fields: fields,
+        token: token
+    };
+
+    var requestResponse = helpers.httpRequest({
+        url: helpers.addUrlParameters(url, parameters),
+        method: 'GET',
+        json: true
+    });
+
+    requestResponse.then(function( user ) {
+        deferred.resolve(user);
+    });
+
+    requestResponse.fail(function( errorObj ) {
+        deferred.reject(errorObj);
     });
 
     return deferred.promise;
