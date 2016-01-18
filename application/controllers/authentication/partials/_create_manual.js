@@ -65,15 +65,18 @@ function create( request, response, next ) {
             });
 
             getNewUser.fail(function( errorObj ) {
+                // HTTP Status 409 is "Conflict"
                 response.statusCode = 409;
                 return response.json(errorObj.message);
             });
         }
         else if( errorObj.statusCode == 403 ) {
+            // HTTP Status 403 is "Forbidden"
             response.statusCode = 403;
             return response.json(errorObj.message);
         }
         else if( errorObj.statusCode == 500 ) {
+            // HTTP Status 500 is "Internal Server Error"
             response.statusCode = 500;
             return response.json(errorObj.message);
         }
